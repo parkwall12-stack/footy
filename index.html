@@ -14,6 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Touchline · World Cup 2026 — Form, Fixtures & Friendlies</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDYiIGZpbGw9IiNmZmZmZmYiIHN0cm9rZT0iIzBBMTQxMCIgc3Ryb2tlLXdpZHRoPSI1Ii8+CjxwYXRoIGZpbGw9IiMwQTE0MTAiIGQ9Ik01MCAyNyA2NiAzOC42IDU5LjkgNTcuOCA0MC4xIDU3LjggMzQgMzguNloiLz4KPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMEExNDEwIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCI+CjxwYXRoIGQ9Ik01MCAyN1Y4Ii8+CjxwYXRoIGQ9Ik02NiAzOC42IDgzLjUgMzAuNSIvPgo8cGF0aCBkPSJNNTkuOSA1Ny44IDcyLjUgNzcuNSIvPgo8cGF0aCBkPSJNNDAuMSA1Ny44IDI3LjUgNzcuNSIvPgo8cGF0aCBkPSJNMzQgMzguNiAxNi41IDMwLjUiLz4KPC9nPgo8L3N2Zz4=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -233,14 +234,6 @@
   .legend span{display:inline-flex; align-items:center; gap:6px}
   .dot{width:10px; height:10px; border-radius:3px; display:inline-block}
 
-  /* columns */
-  .cols{display:grid; gap:22px; margin:26px 0 10px}
-  @media(min-width:860px){ .cols{grid-template-columns:1fr 1fr; gap:26px} }
-  .col__hd{display:flex; align-items:center; justify-content:space-between; margin-bottom:13px}
-  .col__hd h3{font-family:'Archivo',sans-serif; font-weight:800; font-size:15px; letter-spacing:-.01em; margin:0;
-    text-transform:uppercase; letter-spacing:.02em}
-  .col__hd .note{font-family:'Space Mono',monospace; font-size:11px; color:var(--faint)}
-
   /* scoreboard rows */
   .matches{display:flex; flex-direction:column; gap:9px}
   .match-wrap{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm);
@@ -286,6 +279,67 @@
     padding:7px 11px; cursor:pointer; transition:border-color .15s, background .15s}
   .mm-btn:hover{border-color:var(--gold-deep); background:var(--surface)}
   .mm-btn img{width:18px; height:13px; object-fit:cover; border-radius:2px}
+
+  /* ---------- tabs ---------- */
+  .tabs{display:flex; gap:4px; margin:28px 0 0; border-bottom:1px solid var(--line)}
+  .tab{
+    appearance:none; background:none; border:0; cursor:pointer; position:relative;
+    font-family:'Archivo',sans-serif; font-weight:700; font-size:14.5px; letter-spacing:.005em;
+    color:var(--faint); padding:12px 15px 14px; display:inline-flex; align-items:center; gap:9px;
+    transition:color .15s;
+  }
+  .tab:hover{color:var(--muted)}
+  .tab[aria-selected="true"]{color:var(--chalk)}
+  .tab[aria-selected="true"]::after{
+    content:""; position:absolute; left:11px; right:11px; bottom:-1px; height:2px;
+    background:var(--gold); border-radius:2px 2px 0 0;
+  }
+  .tab .cnt{
+    font-family:'Space Mono',monospace; font-size:11px; line-height:1; color:var(--faint);
+    background:var(--surface2); border:1px solid var(--line-strong); border-radius:999px; padding:3px 7px;
+  }
+  .tab[aria-selected="true"] .cnt{color:var(--gold); border-color:var(--gold-deep)}
+  .tabpanel{padding-top:20px; animation:fade .22s ease}
+  .tabpanel[hidden]{display:none}
+
+  /* sub-group headers inside the World Cup tab */
+  .subhd{display:flex; align-items:center; gap:12px; margin:4px 0 13px}
+  .subhd + .matches + .subhd, .subhd--gap{margin-top:28px}
+  .subhd h4{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--faint); margin:0; white-space:nowrap}
+  .subhd .ln{flex:1; height:1px; background:var(--line)}
+  .subhd .scnt{font-family:'Space Mono',monospace; font-size:11px; color:var(--faint)}
+
+  /* ---------- match stats panel ---------- */
+  .stats-load{display:flex; align-items:center; gap:10px; padding:15px 2px; color:var(--muted); font-size:13px}
+  .spin{width:15px; height:15px; border:2px solid var(--line-strong); border-top-color:var(--gold);
+    border-radius:50%; flex:0 0 auto}
+  .stat-head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 0 6px}
+  .stat-head .sht{display:flex; align-items:center; gap:8px; min-width:0; font-size:13px; color:var(--muted); flex:1}
+  .stat-head .sht.r{flex-direction:row-reverse; text-align:right}
+  .stat-head .sht img{width:22px; height:15px; object-fit:cover; border-radius:3px; flex:0 0 auto;
+    box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+  .stat-head .sht span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .stat-head .sht.self span{color:var(--chalk); font-weight:600}
+  .stat-head .vs{font-family:'Space Mono',monospace; font-size:11px; color:var(--faint); flex:0 0 auto}
+
+  .statline{padding:4px 0 2px}
+  .statrow{display:grid; grid-template-columns:42px 1fr 42px; align-items:center; gap:12px; padding:9px 0}
+  .statrow + .statrow{border-top:1px solid var(--line)}
+  .statrow__v{font-family:'Space Mono',monospace; font-weight:700; font-size:14px; color:var(--muted)}
+  .statrow__v.l{text-align:right} .statrow__v.r{text-align:left}
+  .statrow__v.self{color:var(--chalk)}
+  .statrow__mid{min-width:0}
+  .statrow__lbl{font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.07em;
+    text-transform:uppercase; color:var(--faint); text-align:center; margin-bottom:6px}
+  .bar{display:flex; height:6px; border-radius:4px; overflow:hidden; background:var(--bg2)}
+  .bar i{display:block; height:100%; min-width:2px}
+  .bar i.on{background:var(--gold)}
+  .bar i.off{background:var(--line-strong)}
+  .stat-foot{display:flex; gap:9px; flex-wrap:wrap; margin-top:14px; padding-top:13px; border-top:1px solid var(--line)}
+  .stat-empty{padding:6px 2px 4px; color:var(--muted); font-size:13px; line-height:1.5}
+  .stat-empty b{color:var(--chalk)}
+  .stat-empty .sub{display:block; margin-top:4px; color:var(--faint); font-size:12px}
 
   /* skeleton + states */
   .skel{height:60px; border-radius:var(--r-sm); border:1px solid var(--line);
@@ -370,20 +424,23 @@
         <span><i class="dot" style="background:var(--win)"></i>Win</span>
         <span><i class="dot" style="background:var(--draw)"></i>Draw</span>
         <span><i class="dot" style="background:var(--loss)"></i>Loss</span>
-        <span><i class="dot" style="background:var(--gold)"></i>World Cup match</span>
-        <span><i class="dot" style="background:var(--line-strong)"></i>Friendly</span>
       </div>
     </div>
 
-    <div class="cols">
-      <div>
-        <div class="col__hd"><h3>Recent results</h3><span class="note" id="resNote">last 5</span></div>
-        <div class="matches" id="results"></div>
-      </div>
-      <div>
-        <div class="col__hd"><h3>Upcoming fixtures</h3><span class="note">next 5</span></div>
-        <div class="matches" id="fixtures"></div>
-      </div>
+    <div class="tabs" role="tablist" aria-label="Match views">
+      <button class="tab" id="tab-fr" role="tab" aria-selected="true" aria-controls="panel-fr" data-tab="fr">
+        Friendlies <span class="cnt" id="cnt-fr">·</span>
+      </button>
+      <button class="tab" id="tab-wc" role="tab" aria-selected="false" aria-controls="panel-wc" data-tab="wc">
+        World Cup <span class="cnt" id="cnt-wc">·</span>
+      </button>
+    </div>
+
+    <div class="tabpanel" id="panel-fr" role="tabpanel" aria-labelledby="tab-fr" tabindex="0">
+      <div class="matches" id="friendlies"></div>
+    </div>
+    <div class="tabpanel" id="panel-wc" role="tabpanel" aria-labelledby="tab-wc" tabindex="0" hidden>
+      <div id="wcWrap"></div>
     </div>
   </section>
 </main>
@@ -393,7 +450,7 @@
     <span>TOUCHLINE — a World Cup 2026 explorer.</span>
     <span>Match data: <a href="https://www.thesportsdb.com" target="_blank" rel="noopener">TheSportsDB</a></span>
     <span>Flags: <a href="https://flagcdn.com" target="_blank" rel="noopener">FlagCDN</a></span>
-    <span>Not affiliated with FIFA. Tap any match for venue, stage &amp; head-to-head.</span>
+    <span>Not affiliated with FIFA. Tap a World Cup game for shots, possession &amp; more.</span>
   </div>
 </footer>
 
@@ -519,6 +576,10 @@ async function resolveTeam(candidates){
 }
 async function lastEvents(id){ const j = await getJSON(API+'/eventslast.php?id='+id); return (j && (j.results||j.events)) || []; }
 async function nextEvents(id){ const j = await getJSON(API+'/eventsnext.php?id='+id); return (j && (j.events||j.results)) || []; }
+async function eventStats(eventId){
+  const j = await getJSON(API+'/lookupeventstats.php?id='+encodeURIComponent(eventId));
+  return (j && (j.eventstats || j.statistics || j.results)) || [];
+}
 
 /* ----------------------------- helpers ----------------------------- */
 const $ = s => document.querySelector(s);
@@ -546,6 +607,34 @@ function classifyComp(league){
   if(L.includes('asian cup')) return {label:'Asian Cup', cls:''};
   return {label: league || 'Match', cls:''};
 }
+const compCls   = ev => classifyComp(ev && ev.strLeague).cls;
+const isWorldCup = ev => compCls(ev) === 'wc';
+const isFriendly = ev => compCls(ev) === 'friendly';
+
+/* normalise TheSportsDB stat names → clean labels, ordered by importance */
+const STAT_LABELS = {
+  'total shots':'Total shots','shots total':'Total shots','shots':'Total shots',
+  'shots on goal':'Shots on target','shots on target':'Shots on target','on target':'Shots on target',
+  'shots off goal':'Shots off target','shots off target':'Shots off target','shots off':'Shots off target',
+  'blocked shots':'Blocked shots','shots blocked':'Blocked shots',
+  'shots insidebox':'Shots inside box','shots outsidebox':'Shots outside box',
+  'ball possession':'Possession','possession':'Possession','possession %':'Possession',
+  'corner kicks':'Corners','corners':'Corners',
+  'goalkeeper saves':'Saves','saves':'Saves','goalie saves':'Saves',
+  'fouls':'Fouls','fouls committed':'Fouls',
+  'offsides':'Offsides',
+  'yellow cards':'Yellow cards','red cards':'Red cards',
+  'total passes':'Passes','passes':'Passes','passes accurate':'Accurate passes','passes %':'Pass accuracy',
+  'expected goals':'Expected goals (xG)','expected_goals':'Expected goals (xG)','xg':'Expected goals (xG)'
+};
+const STAT_PRIORITY = ['Total shots','Shots on target','Shots off target','Blocked shots','Expected goals (xG)',
+  'Possession','Corners','Saves','Fouls','Offsides','Yellow cards','Red cards','Passes','Accurate passes','Pass accuracy'];
+function prettyStat(raw){
+  const k = String(raw||'').toLowerCase().trim();
+  return STAT_LABELS[k] || k.replace(/\b\w/g, c => c.toUpperCase());
+}
+function statRank(label){ const i = STAT_PRIORITY.indexOf(label); return i<0 ? 99 : i; }
+function statNum(v){ const m = String(v==null?'':v).match(/-?\d+(\.\d+)?/); return m ? parseFloat(m[0]) : null; }
 
 /* small badge: prefer flag (known nation) → api badge → initials */
 function badgeHTML(name, apiBadge, cls){
@@ -580,56 +669,130 @@ function resultOf(ev, team){
 
 /* ----------------------------- render: match row ----------------------------- */
 let rowSeq = 0;
-function matchHTML(ev, team, isFixture){
-  const id = 'm'+(rowSeq++);
+let ROW_EVENTS = {};   // moreId -> {ev, team}  (lets the stats loader find its match)
+
+/* the clickable scoreboard line — shared by every row type */
+function rowHead(ev, team, isFixture, moreId){
   const comp = classifyComp(ev.strLeague);
   const res = isFixture ? 'U' : resultOf(ev, team);
   const self = sideOf(ev, team);
-
-  const homeSelf = self==='home' ? ' is-self' : '';
-  const awaySelf = self==='away' ? ' is-self' : '';
-
   const hb = badgeHTML(ev.strHomeTeam, ev.strHomeTeamBadge, 'sb');
   const ab = badgeHTML(ev.strAwayTeam, ev.strAwayTeamBadge, 'sb');
 
   let center;
   if(isFixture){
     const tm = fmtTime(ev.strTime);
-    center = tm ? '<span class="score up">'+tm+'</span>' : '<span class="score up">vs</span>';
+    center = '<span class="score up">'+(tm || 'vs')+'</span>';
   }else{
     const hs = (ev.intHomeScore==null||ev.intHomeScore==='')?'–':ev.intHomeScore;
     const as = (ev.intAwayScore==null||ev.intAwayScore==='')?'–':ev.intAwayScore;
     center = '<span class="score">'+esc(hs)+'&nbsp;–&nbsp;'+esc(as)+'</span>';
   }
-
-  // expandable detail (no extra fetch — all from the event)
-  const bits = [];
-  if(ev.strVenue) bits.push('<span class="mm-item"><b>Venue</b> '+esc(ev.strVenue)+'</span>');
-  if(ev.strLeague) bits.push('<span class="mm-item"><b>Competition</b> '+esc(ev.strLeague)+'</span>');
-  if(ev.intRound && ev.intRound!=='0') bits.push('<span class="mm-item"><b>Round</b> '+esc(ev.intRound)+'</span>');
-  bits.push('<span class="mm-item"><b>Date</b> '+fmtDate(ev.dateEvent)+(fmtTime(ev.strTime)?' · '+fmtTime(ev.strTime):'')+'</span>');
-
-  const homeBtn = '<button class="mm-btn" data-open="'+esc(ev.strHomeTeam)+'">'+badgeHTML(ev.strHomeTeam, ev.strHomeTeamBadge,'')+esc(ev.strHomeTeam)+'</button>';
-  const awayBtn = '<button class="mm-btn" data-open="'+esc(ev.strAwayTeam)+'">'+badgeHTML(ev.strAwayTeam, ev.strAwayTeamBadge,'')+esc(ev.strAwayTeam)+'</button>';
-
-  return ''+
-  '<div class="match-wrap">'+
-    '<button class="match res-'+res+'" aria-expanded="false" data-more="'+id+'">'+
+  return '<button class="match res-'+res+'" aria-expanded="false" data-more="'+moreId+'">'+
       '<div class="match__meta">'+
         '<span class="match__date">'+fmtDate(ev.dateEvent)+'</span>'+
         '<span class="tag '+comp.cls+'">'+esc(comp.label)+'</span>'+
       '</div>'+
       '<div class="match__body">'+
-        '<span class="side home'+homeSelf+'"><span class="tn">'+esc(ev.strHomeTeam)+'</span>'+hb+'</span>'+
+        '<span class="side home'+(self==='home'?' is-self':'')+'"><span class="tn">'+esc(ev.strHomeTeam)+'</span>'+hb+'</span>'+
         center+
-        '<span class="side away'+awaySelf+'">'+ab+'<span class="tn">'+esc(ev.strAwayTeam)+'</span></span>'+
+        '<span class="side away'+(self==='away'?' is-self':'')+'">'+ab+'<span class="tn">'+esc(ev.strAwayTeam)+'</span></span>'+
       '</div>'+
-    '</button>'+
-    '<div class="match-more" id="'+id+'">'+
+    '</button>';
+}
+
+/* jump-to-team buttons reused in detail + stats footers */
+function jumpBtns(ev){
+  return '<button class="mm-btn" data-open="'+esc(ev.strHomeTeam)+'">'+badgeHTML(ev.strHomeTeam, ev.strHomeTeamBadge,'')+esc(ev.strHomeTeam)+'</button>'+
+         '<button class="mm-btn" data-open="'+esc(ev.strAwayTeam)+'">'+badgeHTML(ev.strAwayTeam, ev.strAwayTeamBadge,'')+esc(ev.strAwayTeam)+'</button>';
+}
+
+/* expandable info panel (no extra fetch) — friendlies + upcoming fixtures */
+function infoMore(ev, id){
+  const bits = [];
+  if(ev.strVenue) bits.push('<span class="mm-item"><b>Venue</b> '+esc(ev.strVenue)+'</span>');
+  if(ev.strLeague) bits.push('<span class="mm-item"><b>Competition</b> '+esc(ev.strLeague)+'</span>');
+  if(ev.intRound && ev.intRound!=='0') bits.push('<span class="mm-item"><b>Round</b> '+esc(ev.intRound)+'</span>');
+  bits.push('<span class="mm-item"><b>Date</b> '+fmtDate(ev.dateEvent)+(fmtTime(ev.strTime)?' · '+fmtTime(ev.strTime):'')+'</span>');
+  return '<div class="match-more" id="'+id+'">'+
       '<div class="mm-grid">'+bits.join('')+'</div>'+
-      '<div class="mm-actions">'+homeBtn+awayBtn+'</div>'+
-    '</div>'+
-  '</div>';
+      '<div class="mm-actions">'+jumpBtns(ev)+'</div>'+
+    '</div>';
+}
+
+/* standard row: friendly (played) or fixture (upcoming) — both use the info panel */
+function matchHTML(ev, team, isFixture){
+  const id = 'm'+(rowSeq++);
+  return '<div class="match-wrap">'+rowHead(ev, team, isFixture, id)+infoMore(ev, id)+'</div>';
+}
+
+/* World-Cup played row: expands to lazily-loaded match stats */
+function wcPlayedHTML(ev, team){
+  const id = 'm'+(rowSeq++);
+  ROW_EVENTS[id] = {ev, team};
+  const more = '<div class="match-more" id="'+id+'" data-stats="1" data-loaded="0">'+
+      '<div class="stats-load"><span class="spin"></span>Loading match stats…</div>'+
+    '</div>';
+  return '<div class="match-wrap">'+rowHead(ev, team, false, id)+more+'</div>';
+}
+
+/* build the stats panel body (header + bars, or a clean empty/error state) */
+function statsBlock(ev, team, statsArr, errMsg){
+  const self = sideOf(ev, team) || 'home';
+  const head =
+    '<div class="stat-head">'+
+      '<span class="sht'+(self==='home'?' self':'')+'">'+badgeHTML(ev.strHomeTeam, ev.strHomeTeamBadge,'')+'<span>'+esc(ev.strHomeTeam)+'</span></span>'+
+      '<span class="vs">'+((ev.intHomeScore!=null&&ev.intHomeScore!=='') ? esc(ev.intHomeScore)+'–'+esc(ev.intAwayScore) : 'vs')+'</span>'+
+      '<span class="sht r'+(self==='away'?' self':'')+'">'+badgeHTML(ev.strAwayTeam, ev.strAwayTeamBadge,'')+'<span>'+esc(ev.strAwayTeam)+'</span></span>'+
+    '</div>';
+
+  let body;
+  if(errMsg){
+    body = '<div class="stat-empty">'+esc(errMsg)+'</div>';
+  }else if(!statsArr || !statsArr.length){
+    body = '<div class="stat-empty">No detailed stats are logged for this match yet.'+
+      '<span class="sub">TheSportsDB doesn’t carry a box score for every fixture — coverage is strongest for major tournament games.</span></div>';
+  }else{
+    const rows = statsArr.map(s => ({
+        label: prettyStat(s.strStat || s.strStatistic || s.stat),
+        hv: (s.intHome!=null ? s.intHome : s.strHome),
+        av: (s.intAway!=null ? s.intAway : s.strAway)
+      }))
+      .filter(r => r.label && (r.hv!=null || r.av!=null))
+      .map(r => Object.assign(r, {rank:statRank(r.label)}))
+      .sort((a,b)=> a.rank-b.rank || a.label.localeCompare(b.label));
+
+    body = '<div class="statline">'+ rows.map(r=>{
+      const hn = statNum(r.hv), an = statNum(r.av);
+      const tot = (hn||0)+(an||0);
+      const hp = tot>0 ? Math.round((hn||0)/tot*100) : 50;
+      const hOn = self==='home' ? 'on' : 'off';
+      const aOn = self==='away' ? 'on' : 'off';
+      return '<div class="statrow">'+
+          '<span class="statrow__v l'+(self==='home'?' self':'')+'">'+(r.hv==null?'–':esc(r.hv))+'</span>'+
+          '<span class="statrow__mid">'+
+            '<div class="statrow__lbl">'+esc(r.label)+'</div>'+
+            '<div class="bar"><i class="'+hOn+'" style="width:'+hp+'%"></i><i class="'+aOn+'" style="width:'+(100-hp)+'%"></i></div>'+
+          '</span>'+
+          '<span class="statrow__v r'+(self==='away'?' self':'')+'">'+(r.av==null?'–':esc(r.av))+'</span>'+
+        '</div>';
+    }).join('') +'</div>';
+  }
+
+  return head + body + '<div class="stat-foot">'+jumpBtns(ev)+'</div>';
+}
+
+async function loadStats(panel){
+  const ctx = ROW_EVENTS[panel.id];
+  if(!ctx){ panel.innerHTML = '<div class="stat-empty">Stats unavailable for this row.</div>'; return; }
+  const {ev, team} = ctx;
+  if(!ev.idEvent){ panel.innerHTML = statsBlock(ev, team, null, 'No match ID is available to pull stats for this game.'); return; }
+  try{
+    const arr = await eventStats(ev.idEvent);
+    panel.innerHTML = statsBlock(ev, team, arr, null);
+  }catch(e){
+    panel.innerHTML = statsBlock(ev, team, null, 'Stats couldn’t load right now — give it a refresh in a moment.');
+  }
 }
 
 function skeleton(n){ let h=''; for(let i=0;i<n;i++) h+='<div class="skel"></div>'; return h; }
@@ -683,60 +846,85 @@ function renderForm(events, team){
 async function openTeam(team){
   currentTeam = team;
   rowSeq = 0;
+  ROW_EVENTS = {};
   $('#home').hidden = true;
   $('#team').hidden = false;
   $('#searchResults').hidden = true;
   $('#searchInput').value = '';
+  selectTab('fr');
   window.scrollTo({top:0, behavior:'auto'});
 
   // instant shell (flag-based, always works)
   $('#teamHd').innerHTML = teamHeader(team, null);
   $('#formChips').innerHTML = '<span class="chip chip--ph">·</span>'.repeat(5);
-  $('#results').innerHTML = skeleton(4);
-  $('#fixtures').innerHTML = skeleton(3);
-  $('#resNote').textContent = 'last 5';
+  $('#friendlies').innerHTML = skeleton(4);
+  $('#wcWrap').innerHTML = skeleton(3);
+  $('#cnt-fr').textContent = '·';
+  $('#cnt-wc').textContent = '·';
 
   let resolved = null;
   try{ resolved = await resolveTeam(team.q || [team.name]); }
   catch(e){ resolved = null; }
+  if(currentTeam !== team) return;
 
   if(resolved){
     team.idTeam = resolved.idTeam;
     if(resolved.strBadge) $('#teamHd').innerHTML = teamHeader(team, resolved.strBadge);
-    if(resolved.intFormedYear){ /* could show, kept minimal */ }
   }
 
   if(!resolved || !resolved.idTeam){
-    $('#results').innerHTML = '<div class="state">Couldn’t find live match data for <b>'+esc(team.name)+'</b> right now. Try another nation, or refresh in a moment.</div>';
-    $('#fixtures').innerHTML = '<div class="state">No fixture feed available.</div>';
     $('#formChips').innerHTML = '<span class="chip chip--ph">–</span>'.repeat(5);
+    $('#friendlies').innerHTML = '<div class="state">Couldn’t find live match data for <b>'+esc(team.name)+'</b> right now. Try another nation, or refresh in a moment.</div>';
+    $('#wcWrap').innerHTML = '<div class="state">No match feed available.</div>';
+    $('#cnt-fr').textContent = '0';
+    $('#cnt-wc').textContent = '0';
     return;
   }
 
-  // results + fixtures in parallel
+  // recent results + upcoming fixtures in parallel
   const [resR, resF] = await Promise.allSettled([ lastEvents(resolved.idTeam), nextEvents(resolved.idTeam) ]);
+  if(currentTeam !== team) return;
 
-  if(currentTeam !== team) return; // user navigated away
+  const last = resR.status==='fulfilled' ? (resR.value||[]) : null;
+  const next = resF.status==='fulfilled' ? (resF.value||[]) : null;
 
-  if(resR.status==='fulfilled'){
-    const evs = resR.value || [];
-    renderForm(evs, team);
-    $('#resNote').textContent = evs.length ? ('last '+Math.min(evs.length,5)) : '';
-    $('#results').innerHTML = evs.length
-      ? evs.slice(0,5).map(e => matchHTML(e, team, false)).join('')
-      : '<div class="state">No recent matches found for <b>'+esc(team.name)+'</b>.</div>';
+  // form strip — all recent played games (mixed comps), newest first
+  if(last) renderForm(last, team);
+  else $('#formChips').innerHTML = '<span class="chip chip--ph">–</span>'.repeat(5);
+
+  // ---- Friendlies tab: recent non–World-Cup matches (the warm-ups) ----
+  if(last){
+    const friendlies = last.filter(e => !isWorldCup(e));
+    $('#cnt-fr').textContent = String(friendlies.length);
+    $('#friendlies').innerHTML = friendlies.length
+      ? friendlies.map(e => matchHTML(e, team, false)).join('')
+      : '<div class="state">No warm-up friendlies in the recent feed for <b>'+esc(team.name)+'</b>.</div>';
   }else{
-    $('#results').innerHTML = '<div class="state">Live results couldn’t load — give it a refresh in a moment.</div>';
-    $('#formChips').innerHTML = '<span class="chip chip--ph">–</span>'.repeat(5);
+    $('#cnt-fr').textContent = '–';
+    $('#friendlies').innerHTML = '<div class="state">Recent results couldn’t load — give it a refresh in a moment.</div>';
   }
 
-  if(resF.status==='fulfilled'){
-    const evs = resF.value || [];
-    $('#fixtures').innerHTML = evs.length
-      ? evs.slice(0,5).map(e => matchHTML(e, team, true)).join('')
-      : '<div class="state">No upcoming fixtures scheduled in the feed yet.</div>';
+  // ---- World Cup tab: games played (with stats) + games coming up ----
+  const wcPlayed = last ? last.filter(isWorldCup) : [];
+  let wcNext = next ? next.filter(isWorldCup) : [];
+  if(next && !wcNext.length) wcNext = next.slice(); // during the tournament, upcoming fixtures are WC
+  $('#cnt-wc').textContent = String(wcPlayed.length + wcNext.length);
+
+  if(last===null && next===null){
+    $('#wcWrap').innerHTML = '<div class="state">World Cup feed couldn’t load — give it a refresh in a moment.</div>';
+  }else if(!wcPlayed.length && !wcNext.length){
+    $('#wcWrap').innerHTML = '<div class="state">No World Cup matches for <b>'+esc(team.name)+'</b> in the feed yet — they’ll show up here as they’re played and scheduled.</div>';
   }else{
-    $('#fixtures').innerHTML = '<div class="state">Fixtures couldn’t load right now.</div>';
+    let html = '';
+    if(wcPlayed.length){
+      html += '<div class="subhd"><h4>Games played</h4><span class="ln"></span><span class="scnt">'+wcPlayed.length+'</span></div>';
+      html += '<div class="matches">'+wcPlayed.map(e => wcPlayedHTML(e, team)).join('')+'</div>';
+    }
+    if(wcNext.length){
+      html += '<div class="subhd'+(wcPlayed.length?' subhd--gap':'')+'"><h4>Coming up</h4><span class="ln"></span><span class="scnt">'+wcNext.length+'</span></div>';
+      html += '<div class="matches">'+wcNext.map(e => matchHTML(e, team, true)).join('')+'</div>';
+    }
+    $('#wcWrap').innerHTML = html;
   }
 }
 
@@ -784,6 +972,19 @@ function wireSearch(){
   });
 }
 
+/* ----------------------------- tabs ----------------------------- */
+function selectTab(name){
+  document.querySelectorAll('.tab').forEach(t =>
+    t.setAttribute('aria-selected', t.dataset.tab===name ? 'true' : 'false'));
+  const fr = $('#panel-fr'), wc = $('#panel-wc');
+  if(fr) fr.hidden = name!=='fr';
+  if(wc) wc.hidden = name!=='wc';
+}
+function wireTabs(){
+  document.querySelectorAll('.tab').forEach(t =>
+    t.addEventListener('click', () => selectTab(t.dataset.tab)));
+}
+
 /* ----------------------------- events ----------------------------- */
 function wire(){
   $('#brand').addEventListener('click', showHome);
@@ -806,6 +1007,10 @@ function wire(){
       if(panel){
         const isOpen = panel.classList.toggle('open');
         m.setAttribute('aria-expanded', isOpen ? 'true':'false');
+        if(isOpen && panel.dataset.stats === '1' && panel.dataset.loaded === '0'){
+          panel.dataset.loaded = '1';
+          loadStats(panel);
+        }
       }
     }
   });
@@ -814,6 +1019,7 @@ function wire(){
 /* ----------------------------- init ----------------------------- */
 renderGroups();
 wireSearch();
+wireTabs();
 wire();
 </script>
 </body>
