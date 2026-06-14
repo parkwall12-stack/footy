@@ -1,352 +1,3 @@
-
-Claude finished the response
-make me a code that i can pull up on a github website and i can choose any of the world cup teams/games and it will pull up the stats from privous games and be able to go back and see previous match results in friendlys as well leading up to the world cup make it look professional and good with good user friendly ness
-
-3:51 PM
-
-Verifying API reliability and confirming free access credentials
-Verifying API reliability and confirming free access credentials
-Let me verify the best way to get real soccer data into a static site, and check the current World Cup landscape.
-
-
-Assembling 2026 World Cup tournament structure and team groupings
-Assembling 2026 World Cup tournament structure and team groupings
-CORS is confirmed enabled and the free API works from the browser — that's the architecture locked in. Now let me get the actual 2026 World Cup structure so the team list is real.
-
-
-Troubleshooting web fetch limitations with query parameters
-Troubleshooting web fetch limitations with query parameters
-Strong grounding so far: 48 teams, 12 groups (A–L), June 11–July 19, hosts Mexico (A), Canada (B), USA (D). Now let me verify the exact API response shape so the app actually works, then get the full group breakdown.
-
-
-Architected API integration strategy and resolved data-fetching limitations
-Architected API integration strategy and resolved data-fetching limitations
-The web fetcher is dropping query strings, so runtime name-search it is (with graceful fallbacks). Now I need the complete, accurate group breakdown. Let me pull the full draw.
-
-
-Verifying API endpoints and CORS configurations
-Verifying API endpoints and CORS configurations
-I have the full, verified group breakdown for all 48 teams. Before building, let me confirm the specific endpoints I'll depend on (last results / next fixtures) are in the free tier — that's the core of the whole app.
-
-
-Architected comprehensive World Cup dashboard with live API integration and polished UI
-Architected comprehensive World Cup dashboard with live API integration and polished UI
-Everything checks out: CORS-enabled free API, all 48 teams mapped to their groups, confederations, and ISO flag codes. Time to build. I'll go with a dark broadcast/scoreboard aesthetic (justified by the subject — live football, TV graphics, matchday-at-night) with flags pulled reliably from a flag CDN and live match data from TheSportsDB, plus graceful fallbacks so nothing breaks if a request fails.
-
-
-Verified file integrity and structural completeness
-Verified file integrity and structural completeness
-Done. Here's TOUCHLINE '26 — a single-file World Cup app you can drop straight onto GitHub Pages.
-
-What it does
-
-Home screen shows all 12 groups (A–L) with every nation and its flag. Tap any team to open it.
-Search bar filters all 48 teams instantly.
-Team page pulls live data: a recent form strip (last-5 W/D/L), a Recent results column, and an Upcoming fixtures column, all as broadcast-style scoreboard rows.
-Friendlies are tagged distinctly from WC Qualifiers and World Cup matches — so the warm-up games leading into the tournament are easy to spot, which was your main ask.
-Tap any match row to expand venue / competition / round / date, plus buttons to jump to the opponent's page (works even for non-qualified friendly opponents).
-How the data works — Match results come live from TheSportsDB's free API (no key, no backend, CORS-enabled), and flags from FlagCDN. That's the only way to get live stats on a static GitHub Pages site, and it means zero maintenance on your end.
-
-To deploy (also in a comment at the top of the file):
-
-Make a repo, add this file as index.html
-Settings → Pages → Build from branch → main / root → Save
-Open https://<your-username>.github.io/<repo>/
-Two things to know:
-
-The free API returns roughly the 5 most-recent matches per team — plenty for pre-WC friendlies + early group games, but not deep historical archives.
-In this preview sandbox the live fetch may be blocked, but it'll work fine once it's on GitHub Pages (both are HTTPS, so no mixed-content issues). If a specific team ever fails to resolve, the app degrades gracefully — the group grid always renders.
-Want me to add a head-to-head compare mode (two teams side by side), pull in group standings tables, or adjust the look at all?
-
-
-Index
-Code · HTML 
-doesnt it need to be made a github page before there is a url
-
-6:55 PM
-
-Validated user's sequencing concern and clarified GitHub Pages deployment order
-Validated user's sequencing concern and clarified GitHub Pages deployment order
-Right, exactly — you've got the sequence right. The URL doesn't actually serve anything until you enable Pages on the repo. Nothing exists at that address until GitHub builds it.
-
-The thing that makes it feel backwards is that the URL is predictable. GitHub always uses the same format — https://<your-username>.github.io/<repo-name>/ — so you can know what it'll be before you turn it on. But it'll 404 until you do the Settings → Pages step and the build finishes (usually a minute or two). Once that build completes, GitHub actually shows you the live URL right there at the top of the Pages settings screen, so you don't have to guess.
-
-So the real order is:
-
-Create the repo, add the file as index.html
-Settings → Pages → build from branch → main / root → Save
-Wait ~1–2 min for the first build — then the URL goes live
-The file itself is ready as-is; no edits needed to deploy. The steps in the comment at the top are just the "flip it on" part.
-
-Given you've set up Pages before with your other projects — is this for a fresh repo, or are you thinking of dropping it into one you've already got running?
-
-does it need to be public
-
-6:55 PM
-
-Weighed repository visibility requirements and security implications
-Weighed repository visibility requirements and security implications
-On a free GitHub account, yes — the repo has to be public for Pages to work. Private repos + Pages is a paid feature (to use GitHub Pages on a private repository you need the Pro plan or higher). 
-GitHub
-
-But for this app, public is genuinely the right call anyway, for two reasons:
-
-There's nothing to hide. It's a static site — all the HTML, CSS, and JavaScript runs in the visitor's browser, so anyone can hit View Source and read the whole thing regardless of repo visibility. Even with a private repo, the published site is public, and since GitHub only allows static sites, the code is technically available to anyone who views the page source. Making the repo private buys you nothing in terms of protecting the code. 
-GitHub
-
-No secrets in the file. The only "key" in there is TheSportsDB's free public "123" — it's meant to be public, it's in their docs, and there's no private credential anywhere in the project. So you're not exposing anything by making the repo public.
-
-The repo being public just means people can see your source on GitHub; it doesn't mean they can mess with your live site. Only you can push changes.
-
-So: make the repo public, and you're good. The only time you'd care about private would be if you'd hardcoded a real API key or some proprietary logic — which isn't the case here.
-
-ok right now the site is working and looks great but i want to change the format of the site a bit whe  you click on a team and it pulls up the team page i want it to look better some of the contatners are overlapping lets just make it tabs within, so it show the 5 recent matches still but i want it to be tabs of friendlys leading up to WC then the world cup and for the tab with world cup just make the containers a list of games played and games coming up and if you click on any game i want it to pull up simple stats like total shots, total shots on goal, saves, corners, etc, also make the little icon in the web browser tab a soccer ball
-
-7:05 PM
-
-Verifying API endpoint availability and response structure
-Verifying API endpoint availability and response structure
-I'll refactor the team page into tabs and add match stats. First let me confirm how TheSportsDB exposes match statistics (shots, corners, saves, etc.) on the free tier, since that's the critical piece, then I'll review the current code and rebuild that view.
-
-
-Architected tabbed team interface with match stats retrieval
-Architected tabbed team interface with match stats retrieval
-Good — the event-stats endpoint (lookupeventstats.php) is available on the free key. Coverage can be partial for international matches, so I'll render whatever stats come back and show a clean empty state otherwise. Now let me review the current file structure before refactoring the team view.
-
-
-Architected tabbed interface with match stats and soccer ball favicon
-Architected tabbed interface with match stats and soccer ball favicon
-The codebase is clear. The current two-column layout (#results + #fixtures) is what's causing overlap on some widths, and tabs will fix that cleanly. Let me build this in steps. First, I'll generate a crisp soccer-ball favicon as an inline data URI so there are no escaping bugs.
-
-
-Orchestrated favicon integration for browser tab display
-Orchestrated favicon integration for browser tab display
-Soccer-ball favicon generated. Now let me wire in all the changes. First, the favicon:
-
-
-Restructuring team section markup with tabbed interface
-Restructuring team section markup with tabbed interface
-Now the CSS for tabs and the stats panel — inserting before the skeleton styles:
-
-
-Pivoting toward JavaScript implementation for API integration
-Pivoting toward JavaScript implementation for API integration
-Now replace the two-column team body with the tabbed structure:
-
-
-Deliberated footer updates and prioritized JavaScript API stats implementation
-Deliberated footer updates and prioritized JavaScript API stats implementation
-Now the API helper for match stats, added alongside the existing event fetchers:
-
-
-Rectifying broken corner kicks mapping syntax
-Rectifying broken corner kicks mapping syntax
-Now competition-classification helpers and the stat-label mapping, added after classifyComp:
-
-
-Refactoring match row rendering and restructuring component functions
-Refactoring match row rendering and restructuring component functions
-Let me clean up a messy line in that stat map:
-
-
-Refactoring openTeam function to populate friendlies and World Cup tabs
-Refactoring openTeam function to populate friendlies and World Cup tabs
-Now the core refactor — replacing the single matchHTML function with a shared row builder plus WC-stats rendering and a lazy stats loader:
-
-
-Architecting tab functions and wiring interactive components
-Architecting tab functions and wiring interactive components
-Now rewrite openTeam to populate the tabs (friendlies + WC played/upcoming):
-
-
-Refining footer text to reflect stats instead of head-to-head
-Refining footer text to reflect stats instead of head-to-head
-Now add the tab logic and wire stats-loading into the expand handler:
-
-
-Verifying file coherence and scrutinizing JavaScript syntax
-Verifying file coherence and scrutinizing JavaScript syntax
-Let me update the footer hint to reflect the new stats feature:
-
-
-Deliberating whether removing unused CSS rules enhances code cleanliness
-Deliberating whether removing unused CSS rules enhances code cleanliness
-Let me verify there are no leftover references to the removed elements, then syntax-check the JavaScript:
-
-
-Verifying HTML structure balance and JavaScript connectivity
-Verifying HTML structure balance and JavaScript connectivity
-The only remaining .cols references are now-dead CSS. Let me remove that unused block, then syntax-check the JS:
-
-
-Crafting a Node harness to validate rendering logic
-Crafting a Node harness to validate rendering logic
-JS is valid. Let me view the final team-view markup and a sample of the rebuilt functions to confirm everything is coherent:
-
-
-Testing logic with Node harness and runtime stubs
-Testing logic with Node harness and runtime stubs
-Let me do a final review of the rebuilt rendering functions to be sure the logic is sound:
-
-
-Deliberated testing strategy to validate rendering logic soundness
-Deliberated testing strategy to validate rendering logic soundness
-Let me run a focused test of the new stats-rendering logic (label mapping, sorting, bar math) with mock API data to confirm it behaves correctly:
-
-
-Verified completed refactor and prepared final presentation
-Verified completed refactor and prepared final presentation
-Everything checks out — correct ordering (priority stats first, unknowns last), bar math is right, and possession percentages are handled. The refactor is complete and verified. Here's the updated app:
-
-
-Prepared concise summary of requested design modifications
-Prepared concise summary of requested design modifications
-Done. The team page is now tab-based, which fixes the overlap (it was the two side-by-side columns colliding on narrower widths — now everything is a single column per tab).
-
-What changed when you open a team:
-
-Two tabs — Friendlies and World Cup — each with a live count badge. Recent form chips (last-5 W/D/L) still sit up top above the tabs.
-
-Friendlies tab shows the warm-up matches leading into the tournament (your recent non-WC games), each tappable for venue, competition and date.
-
-World Cup tab splits into Games played and Coming up. Tap any played WC game and it expands into a stats panel — total shots, shots on target, possession, corners, saves, fouls, cards — shown as paired bars with your team's side highlighted in gold. Stats load only when you tap a game (lazy), so the page stays fast. Upcoming games expand to show kickoff time and venue instead.
-
-Soccer-ball favicon is now in the browser tab (an inline SVG, so no extra file to host).
-
-Two things worth knowing about the stats:
-
-They come from TheSportsDB's crowd-sourced box scores, which are strongest for major tournament games but thin or missing for some fixtures. When a match has no logged stats, you'll get a clean "No detailed stats logged" message rather than a broken panel.
-In this preview sandbox the live API fetch may be blocked, but it'll work once it's on GitHub Pages (both HTTPS, no mixed-content issues).
-If you want, I can add group standings tables to the home view, or a compare mode to put two teams' stats side by side.
-
-
-Index
-Code · HTML 
-can we pull up better stats from the WC games, right now it shows some dumb stats, I want it to show Total Shots, Shots on target, Corners, Saves, and possession, and when i open up mexico i see that they played south africa but when i open up south africa there is no game against mexico, aslo when i open it up just have the world cup games if you cant pull up friendys data also pull up the next 3 games bc pool play
-
-9:14 PM
-
-Refactoring stat constants with curated whitelist approach
-Refactoring stat constants with curated whitelist approach
-This is a meaningful set of changes. Let me think through the asymmetry bug first, since that drives the fix.
-
-The likely root cause: my World Cup tab filters each team's feed by league name (isWorldCup), and TheSportsDB is crowd-sourced — the same match can be labeled "FIFA World Cup" on Mexico's record but something generic on South Africa's, so it gets filtered out on one side. A team's own opener is always in its own results feed, so the fix is to stop relying on the league label and instead build each team's 3 group games from the known bracket and match them by opponent. That also naturally gives the "next 3 pool games."
-
-Let me look at the current stat + classifier block to rework it:
-
-
-Restructured stat filtering and group-stage fixture matching logic
-Restructured stat filtering and group-stage fixture matching logic
-Now I'll implement the fixes. First, replace the generic stat machinery with a curated whitelist of exactly the five stats you want (Total shots, Shots on target, Corners, Saves, Possession):
-
-
-Navigated code structure to locate and modify helper functions
-Navigated code structure to locate and modify helper functions
-Now add the group-fixture helpers (these drive symmetric pool games matched by opponent, not league label). Let me place them after resultOf:
-
-
-Prepared to refactor stats display component
-Prepared to refactor stats display component
-Now update statsBlock to use the curated stats. Let me view the current version:
-
-
-Restructuring game logic to prioritize group matches first
-Restructuring game logic to prioritize group matches first
-Now the main rewrite — the World Cup section of openTeam. Let me view the current version:
-
-
-Restructured World Cup tab logic and unified match data handling
-Restructured World Cup tab logic and unified match data handling
-Now rewrite the friendlies + World Cup sections of openTeam to build pool games from the bracket:
-
-
-Verifying DOM skeleton initialization across both panels
-Verifying DOM skeleton initialization across both panels
-Now default to the World Cup tab (since that's the focus during the tournament) and make it the first tab:
-
-
-Validating logic and testing mock data flows
-Validating logic and testing mock data flows
-Let me verify no stale references remain and syntax-check:
-
-
-Validating curated stats and verifying game symmetry across teams
-Validating curated stats and verifying game symmetry across teams
-Syntax clean. Now let me test the two core behaviors — the curated stat selection and the bracket-based pool-game logic (including the symmetry fix and name-variant matching) — with mock data:
-
-
-Validated fixes for stat curation, game symmetry, and pool display
-Validated fixes for stat curation, game symmetry, and pool display
-Both behaviors are verified:
-
-Curated stats return exactly Total shots, Shots on target, Corners, Saves, Possession (in that order), dropping fouls/cards/offsides.
-Symmetry fix works: South Africa's page now lists the Mexico game even when SA's own feed is empty, and the "Korea Republic" name variant correctly matches "South Korea." Critically, because games are matched by opponent rather than league label, a game that's in a team's feed but mislabeled (the actual cause of your bug) now gets found and shown with its score/stats.
-Let me confirm no leftover references to the old variables and do a final check:
-
-
-Verified implementation and prepared to present three stat-related fixes
-Verified implementation and prepared to present three stat-related fixes
-All clean and verified. Here's the updated app:
-
-
-Presented file
-Presented file
-Done — all three things are fixed.
-
-Curated stats. Tapping a played World Cup game now shows exactly five stats, in this order: Total shots, Shots on target, Corners, Saves, Possession. Everything else (fouls, cards, offsides, passes) is filtered out. If a match is missing one of the five, that row just doesn't appear; if it has none of them, you get the clean "no stats logged" message.
-
-The Mexico/South Africa asymmetry. This was the real bug, and the cause was subtle: I was deciding which games are "World Cup" by reading each match's league label, and TheSportsDB is crowd-sourced — the same game can be tagged "FIFA World Cup" on Mexico's record but something generic on South Africa's, so it got filtered out on one side. Now each team's three pool games are built from the bracket itself and matched by opponent, not by label. So:
-
-A team's own games always show up correctly (a team's opener is always in its own feed), with the score and stats, regardless of how the league is labeled.
-Even if one side's feed is totally empty, the matchup still appears, derived from the group. Mexico will show on South Africa's page and vice-versa.
-World Cup focus + next 3 pool games. The World Cup tab is now the default (Friendlies moved to second, since friendly data is patchy). The WC tab shows Games played (tappable for stats) and Coming up · pool play — all three group games, so you always see the full pool slate whether or not they're in the live feed yet.
-
-One honest caveat: for a pool game that hasn't been played and isn't yet in the fixtures feed, it shows as a matchup without a date ("date TBD") — I'm deriving the opponent from the bracket but not hardcoding the full kickoff schedule. Once a game is scheduled in the feed (or played), the real date and score fill in automatically.
-
-If you'd rather I hardcode the actual group-stage dates so every upcoming game shows its kickoff time even before the feed lists it, I can pull the official schedule and wire it in.
-
-
-Index
-Code · HTML 
-can we pull up better stats from the WC games, right now it shows some dumb stats, I want it to show Total Shots, Shots on target, Corners, Saves, and possession, and when i open up mexico i see that they played south africa but when i open up south africa there is no game against mexico, aslo when i open it up just have the world cup games if you cant pull up friendys data also pull up the next 3 games bc pool play
-
-9:56 PM
-
-Recognized duplicate request, confirmed prior completion, diagnosed deployment issue
-Recognized duplicate request, confirmed prior completion, diagnosed deployment issue
-All four of those changes are already in the version I built in my last reply — the file you have now already does exactly this. Quick recap of what's in it:
-
-Tapping a played World Cup game shows only Total shots, Shots on target, Corners, Saves, and Possession — nothing else.
-Every team's page lists all three pool games, built from the bracket and matched by opponent (not the league label that was causing the mismatch), so the Mexico game now shows on South Africa's page and vice-versa.
-It defaults to the World Cup tab, with the upcoming group games under "Coming up · pool play."
-Here it is again so you've got the latest:
-
-
-Presented file
-Presented file
-Since you're describing the old behavior ("dumb stats" = the previous version that showed fouls, cards, etc.), I'm fairly sure you're still looking at the build before these changes. The most likely reason:
-
-This file isn't automatically on your live site. You have to replace your repo's index.html with this one and push it (or paste its contents over your current index.html), then hard-refresh (Ctrl/Cmd + Shift + R) — GitHub Pages and your browser both cache the old file aggressively. Until you redeploy, your github.io URL keeps serving the previous version, which is exactly the behavior you're describing.
-
-One caveat worth knowing: the in-chat preview here may not run the live data fetch to TheSportsDB, so the real test is your deployed site.
-
-If you deploy, hard-refresh, and the stats still look wrong, that would mean TheSportsDB is returning stat names my filter doesn't recognize for those specific matches. In that case, tell me what you actually see on one game — say, Mexico vs South Africa — and I'll map the exact names it's using. But for the three structural things (the five stats, the symmetric pool games, and the WC-first layout), the code is already in the file above.
-
-
-Index
-Code · HTML 
-
-Claude Fable 5 is currently unavailable.
-Learn more(opens in new tab)
-
-
-
-
-
-Claude is AI and can make mistakes. Please double-check responses.
-
-
-Index · HTML
 <!DOCTYPE html>
 <!--
   TOUCHLINE — World Cup 2026 form, fixtures & friendlies
@@ -388,7 +39,7 @@ Index · HTML
     --shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 18px 40px -24px rgba(0,0,0,.8);
     --maxw:1080px;
   }
- 
+
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
   body{
@@ -411,16 +62,16 @@ Index · HTML
     z-index:-1;
     pointer-events:none;
   }
- 
+
   a{color:inherit}
   button{font-family:inherit}
   img{display:block}
   .mono{font-family:'Space Mono',ui-monospace,monospace}
- 
+
   :focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:6px}
- 
+
   .wrap{max-width:var(--maxw); margin:0 auto; padding:0 22px}
- 
+
   /* ---------- top bar ---------- */
   .topbar{
     position:sticky; top:0; z-index:40;
@@ -445,7 +96,7 @@ Index · HTML
   }
   .brand__sub{display:none; color:var(--faint); font-size:12.5px; letter-spacing:.02em}
   @media(min-width:680px){ .brand__sub{display:inline} }
- 
+
   /* search */
   .search{position:relative; margin-left:auto; width:min(330px, 46vw)}
   .search__field{display:flex; align-items:center; gap:9px;
@@ -475,7 +126,7 @@ Index · HTML
   .res img{width:22px; height:16px; object-fit:cover; border-radius:2px; flex:0 0 auto}
   .res .res__grp{margin-left:auto; font-family:'Space Mono',monospace; font-size:11px; color:var(--faint)}
   .res--empty{padding:14px; color:var(--muted); font-size:13px}
- 
+
   /* ---------- hero ---------- */
   .hero{padding:48px 0 26px}
   .hero__eyebrow{
@@ -495,7 +146,7 @@ Index · HTML
   }
   .hero p{color:var(--muted); font-size:clamp(15px,2.4vw,17px); max-width:560px; margin:0}
   .hero p b{color:var(--chalk); font-weight:600}
- 
+
   /* ---------- groups ---------- */
   .section-head{
     display:flex; align-items:baseline; gap:14px; margin:40px 0 18px;
@@ -506,7 +157,7 @@ Index · HTML
   }
   .section-head .rule{flex:1; height:1px; background:var(--line)}
   .section-head .count{font-family:'Space Mono',monospace; font-size:12px; color:var(--faint)}
- 
+
   .groups{
     display:grid; gap:14px;
     grid-template-columns:repeat(auto-fill, minmax(240px,1fr));
@@ -537,7 +188,7 @@ Index · HTML
   .teamlink .nm{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .teamlink .chev{color:var(--faint); font-size:15px; opacity:0; transition:opacity .16s, transform .16s; transform:translateX(-4px)}
   .teamlink:hover .chev{opacity:1; transform:translateX(0)}
- 
+
   /* ---------- team view ---------- */
   .back{
     display:inline-flex; align-items:center; gap:8px; margin:22px 0 6px;
@@ -546,7 +197,7 @@ Index · HTML
     transition:color .15s, border-color .15s, background .15s;
   }
   .back:hover{color:var(--chalk); border-color:var(--gold-deep); background:var(--surface)}
- 
+
   .team-hd{
     display:flex; align-items:center; gap:18px; flex-wrap:wrap;
     padding:24px 0 6px; border-bottom:1px solid var(--line); margin-bottom:6px;
@@ -565,7 +216,7 @@ Index · HTML
     padding:4px 9px; border-radius:6px; border:1px solid var(--line-strong); color:var(--muted);
   }
   .pill--grp{color:#0A1410; background:var(--gold); border-color:var(--gold)}
- 
+
   /* form strip */
   .form-strip{padding:18px 0 4px}
   .form-strip__lbl{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em;
@@ -578,11 +229,11 @@ Index · HTML
   .chip.W{background:var(--win)} .chip.D{background:var(--draw)} .chip.L{background:var(--loss)}
   .chip--ph{background:var(--surface2); color:var(--faint)}
   .chips__hint{font-size:12px; color:var(--faint); margin-left:4px}
- 
+
   .legend{display:flex; gap:16px; flex-wrap:wrap; margin:14px 0 2px; font-size:12px; color:var(--muted)}
   .legend span{display:inline-flex; align-items:center; gap:6px}
   .dot{width:10px; height:10px; border-radius:3px; display:inline-block}
- 
+
   /* scoreboard rows */
   .matches{display:flex; flex-direction:column; gap:9px}
   .match-wrap{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-sm);
@@ -616,7 +267,7 @@ Index · HTML
   .score{font-family:'Space Mono',monospace; font-weight:700; font-size:18px; letter-spacing:.02em;
     padding:2px 8px; border-radius:7px; background:var(--bg2); white-space:nowrap; text-align:center}
   .score.up{font-size:13px; color:var(--muted); font-weight:400; background:none}
- 
+
   .match-more{padding:0 14px 13px 14px; border-top:1px solid var(--line); display:none}
   .match-more.open{display:block; animation:fade .2s ease}
   .mm-grid{display:flex; flex-wrap:wrap; gap:7px 22px; padding:12px 0 4px}
@@ -628,7 +279,7 @@ Index · HTML
     padding:7px 11px; cursor:pointer; transition:border-color .15s, background .15s}
   .mm-btn:hover{border-color:var(--gold-deep); background:var(--surface)}
   .mm-btn img{width:18px; height:13px; object-fit:cover; border-radius:2px}
- 
+
   /* ---------- tabs ---------- */
   .tabs{display:flex; gap:4px; margin:28px 0 0; border-bottom:1px solid var(--line)}
   .tab{
@@ -650,7 +301,7 @@ Index · HTML
   .tab[aria-selected="true"] .cnt{color:var(--gold); border-color:var(--gold-deep)}
   .tabpanel{padding-top:20px; animation:fade .22s ease}
   .tabpanel[hidden]{display:none}
- 
+
   /* sub-group headers inside the World Cup tab */
   .subhd{display:flex; align-items:center; gap:12px; margin:4px 0 13px}
   .subhd + .matches + .subhd, .subhd--gap{margin-top:28px}
@@ -658,7 +309,7 @@ Index · HTML
     text-transform:uppercase; color:var(--faint); margin:0; white-space:nowrap}
   .subhd .ln{flex:1; height:1px; background:var(--line)}
   .subhd .scnt{font-family:'Space Mono',monospace; font-size:11px; color:var(--faint)}
- 
+
   /* ---------- match stats panel ---------- */
   .stats-load{display:flex; align-items:center; gap:10px; padding:15px 2px; color:var(--muted); font-size:13px}
   .spin{width:15px; height:15px; border:2px solid var(--line-strong); border-top-color:var(--gold);
@@ -671,7 +322,7 @@ Index · HTML
   .stat-head .sht span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .stat-head .sht.self span{color:var(--chalk); font-weight:600}
   .stat-head .vs{font-family:'Space Mono',monospace; font-size:11px; color:var(--faint); flex:0 0 auto}
- 
+
   .statline{padding:4px 0 2px}
   .statrow{display:grid; grid-template-columns:42px 1fr 42px; align-items:center; gap:12px; padding:9px 0}
   .statrow + .statrow{border-top:1px solid var(--line)}
@@ -689,7 +340,7 @@ Index · HTML
   .stat-empty{padding:6px 2px 4px; color:var(--muted); font-size:13px; line-height:1.5}
   .stat-empty b{color:var(--chalk)}
   .stat-empty .sub{display:block; margin-top:4px; color:var(--faint); font-size:12px}
- 
+
   /* skeleton + states */
   .skel{height:60px; border-radius:var(--r-sm); border:1px solid var(--line);
     background:linear-gradient(100deg,var(--surface) 30%, var(--surface2) 50%, var(--surface) 70%);
@@ -697,16 +348,16 @@ Index · HTML
   .state{background:var(--surface); border:1px dashed var(--line-strong); border-radius:var(--r-sm);
     padding:20px; color:var(--muted); font-size:13.5px; text-align:center}
   .state b{color:var(--chalk)}
- 
+
   footer{border-top:1px solid var(--line); margin-top:46px; padding:24px 0 50px; color:var(--faint); font-size:12.5px}
   footer .wrap{display:flex; flex-wrap:wrap; gap:6px 18px; align-items:center}
   footer a{color:var(--muted); text-decoration:none; border-bottom:1px solid var(--line-strong)}
   footer a:hover{color:var(--chalk)}
- 
+
   [hidden]{display:none !important}
- 
+
   @keyframes fade{from{opacity:0; transform:translateY(-4px)} to{opacity:1; transform:none}}
- 
+
   /* motion — only when the user is happy with it */
   @media (prefers-reduced-motion: no-preference){
     .skel{animation:shimmer 1.3s linear infinite}
@@ -726,7 +377,7 @@ Index · HTML
 </style>
 </head>
 <body>
- 
+
 <header class="topbar">
   <div class="topbar__in">
     <button class="brand" id="brand" aria-label="Touchline home">
@@ -743,7 +394,7 @@ Index · HTML
     </div>
   </div>
 </header>
- 
+
 <main>
   <!-- HOME -->
   <section id="home" class="wrap">
@@ -753,7 +404,7 @@ Index · HTML
       <div class="hero__line"></div>
       <p>Pick any of the <b>48 nations</b> to pull up recent results, upcoming group fixtures, and the warm-up <b>friendlies</b> that led into the tournament — scores, opponents and form, all live.</p>
     </div>
- 
+
     <div class="section-head">
       <h2>The Groups</h2>
       <span class="rule"></span>
@@ -761,7 +412,7 @@ Index · HTML
     </div>
     <div class="groups" id="groups"></div>
   </section>
- 
+
   <!-- TEAM -->
   <section id="team" class="wrap" hidden>
     <button class="back" id="back">← All groups</button>
@@ -775,7 +426,7 @@ Index · HTML
         <span><i class="dot" style="background:var(--loss)"></i>Loss</span>
       </div>
     </div>
- 
+
     <div class="tabs" role="tablist" aria-label="Match views">
       <button class="tab" id="tab-wc" role="tab" aria-selected="true" aria-controls="panel-wc" data-tab="wc">
         World Cup <span class="cnt" id="cnt-wc">·</span>
@@ -784,7 +435,7 @@ Index · HTML
         Friendlies <span class="cnt" id="cnt-fr">·</span>
       </button>
     </div>
- 
+
     <div class="tabpanel" id="panel-wc" role="tabpanel" aria-labelledby="tab-wc" tabindex="0">
       <div id="wcWrap"></div>
     </div>
@@ -793,7 +444,7 @@ Index · HTML
     </div>
   </section>
 </main>
- 
+
 <footer>
   <div class="wrap">
     <span>TOUCHLINE — a World Cup 2026 explorer.</span>
@@ -802,10 +453,10 @@ Index · HTML
     <span>Not affiliated with FIFA. Tap a World Cup game for shots, possession &amp; more.</span>
   </div>
 </footer>
- 
+
 <script>
 "use strict";
- 
+
 /* ----------------------------- data ----------------------------- */
 // q = search terms tried against TheSportsDB (first soccer match wins)
 const GROUPS = [
@@ -882,7 +533,7 @@ const GROUPS = [
     {name:'Panama', iso:'pa', conf:'CONCACAF', q:['Panama']},
   ]},
 ];
- 
+
 /* index for resolving opponent names back to a rich team object */
 const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
 const TEAM_INDEX = {};
@@ -897,7 +548,7 @@ const ALIAS = {'unitedstates':'United States','ivorycoast':'Côte d’Ivoire','c
   'koreathrepublic':'South Korea','koreatrepublic':'South Korea','korearepublic':'South Korea',
   'czechrepublic':'Czechia','turkey':'Türkiye','congodr':'DR Congo','iriran':'Iran','curacao':'Curaçao'};
 Object.keys(ALIAS).forEach(k => { if(TEAM_INDEX[norm(ALIAS[k])]) TEAM_INDEX[k] = TEAM_INDEX[norm(ALIAS[k])]; });
- 
+
 /* ----------------------------- api ----------------------------- */
 const API = 'https://www.thesportsdb.com/api/v1/json/123';
 const cache = new Map();
@@ -929,20 +580,20 @@ async function eventStats(eventId){
   const j = await getJSON(API+'/lookupeventstats.php?id='+encodeURIComponent(eventId));
   return (j && (j.eventstats || j.statistics || j.results)) || [];
 }
- 
+
 /* ----------------------------- helpers ----------------------------- */
 const $ = s => document.querySelector(s);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const flag = (iso, w) => 'https://flagcdn.com/w'+(w||80)+'/'+iso+'.png';
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
- 
+
 function fmtDate(d){
   if(!d) return '—';
   const p = d.split('-'); if(p.length<3) return d;
   return parseInt(p[2],10)+' '+MON[parseInt(p[1],10)-1]+" ’"+p[0].slice(2);
 }
 function fmtTime(t){ if(!t) return ''; const m = t.match(/^(\d{2}):(\d{2})/); return m ? m[1]+':'+m[2] : ''; }
- 
+
 function classifyComp(league){
   const L = (league||'').toLowerCase();
   if(L.includes('friendly')) return {label:'Friendly', cls:'friendly'};
@@ -959,7 +610,7 @@ function classifyComp(league){
 const compCls   = ev => classifyComp(ev && ev.strLeague).cls;
 const isWorldCup = ev => compCls(ev) === 'wc';
 const isFriendly = ev => compCls(ev) === 'friendly';
- 
+
 /* the exact stats to surface for a World Cup game, in display order */
 const WANT_STATS = [
   {label:'Total shots',     keys:['total shots','shots total','shots','total attempts','attempts']},
@@ -987,7 +638,7 @@ function pickStats(arr){
   }
   return out;
 }
- 
+
 /* small badge: prefer flag (known nation) → api badge → initials */
 function badgeHTML(name, apiBadge, cls){
   const t = TEAM_INDEX[norm(name)];
@@ -999,7 +650,7 @@ function phHTML(name, cls){
   const ini = (name||'?').replace(/[^A-Za-z ]/g,'').trim().split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase() || '?';
   return '<span class="'+cls+' ph">'+esc(ini)+'</span>';
 }
- 
+
 /* decide perspective side + result for the team whose page we're on */
 function sideOf(ev, team){
   if(team.idTeam && (ev.idHomeTeam||ev.idAwayTeam)){
@@ -1018,10 +669,10 @@ function resultOf(ev, team){
   const gf = s==='home'? +hs : +as, ga = s==='home'? +as : +hs;
   return gf>ga ? 'W' : gf<ga ? 'L' : 'D';
 }
- 
+
 /* ---- World Cup pool games, built from the known bracket (symmetric & label-proof) ---- */
 const hasScore = ev => ev && ev.intHomeScore!=null && ev.intHomeScore!=='' && ev.intAwayScore!=null && ev.intAwayScore!=='';
- 
+
 /* the 3 pool opponents for a team (same group, excluding itself) */
 function groupOpponents(team){
   if(!team || !team.group) return [];
@@ -1056,12 +707,12 @@ function pseudoFixture(team, foe){
     intHomeScore:null, intAwayScore:null, strLeague:'FIFA World Cup · Group '+team.group,
     dateEvent:null, strTime:null, strVenue:null, idEvent:null};
 }
- 
- 
+
+
 /* ----------------------------- render: match row ----------------------------- */
 let rowSeq = 0;
 let ROW_EVENTS = {};   // moreId -> {ev, team}  (lets the stats loader find its match)
- 
+
 /* the clickable scoreboard line — shared by every row type */
 function rowHead(ev, team, isFixture, moreId){
   const comp = classifyComp(ev.strLeague);
@@ -1069,7 +720,7 @@ function rowHead(ev, team, isFixture, moreId){
   const self = sideOf(ev, team);
   const hb = badgeHTML(ev.strHomeTeam, ev.strHomeTeamBadge, 'sb');
   const ab = badgeHTML(ev.strAwayTeam, ev.strAwayTeamBadge, 'sb');
- 
+
   let center;
   if(isFixture){
     const tm = fmtTime(ev.strTime);
@@ -1091,13 +742,13 @@ function rowHead(ev, team, isFixture, moreId){
       '</div>'+
     '</button>';
 }
- 
+
 /* jump-to-team buttons reused in detail + stats footers */
 function jumpBtns(ev){
   return '<button class="mm-btn" data-open="'+esc(ev.strHomeTeam)+'">'+badgeHTML(ev.strHomeTeam, ev.strHomeTeamBadge,'')+esc(ev.strHomeTeam)+'</button>'+
          '<button class="mm-btn" data-open="'+esc(ev.strAwayTeam)+'">'+badgeHTML(ev.strAwayTeam, ev.strAwayTeamBadge,'')+esc(ev.strAwayTeam)+'</button>';
 }
- 
+
 /* expandable info panel (no extra fetch) — friendlies + upcoming fixtures */
 function infoMore(ev, id){
   const bits = [];
@@ -1110,13 +761,13 @@ function infoMore(ev, id){
       '<div class="mm-actions">'+jumpBtns(ev)+'</div>'+
     '</div>';
 }
- 
+
 /* standard row: friendly (played) or fixture (upcoming) — both use the info panel */
 function matchHTML(ev, team, isFixture){
   const id = 'm'+(rowSeq++);
   return '<div class="match-wrap">'+rowHead(ev, team, isFixture, id)+infoMore(ev, id)+'</div>';
 }
- 
+
 /* World-Cup played row: expands to lazily-loaded match stats */
 function wcPlayedHTML(ev, team){
   const id = 'm'+(rowSeq++);
@@ -1126,7 +777,7 @@ function wcPlayedHTML(ev, team){
     '</div>';
   return '<div class="match-wrap">'+rowHead(ev, team, false, id)+more+'</div>';
 }
- 
+
 /* build the stats panel body (header + bars, or a clean empty/error state) */
 function statsBlock(ev, team, statsArr, errMsg){
   const self = sideOf(ev, team) || 'home';
@@ -1136,7 +787,7 @@ function statsBlock(ev, team, statsArr, errMsg){
       '<span class="vs">'+((ev.intHomeScore!=null&&ev.intHomeScore!=='') ? esc(ev.intHomeScore)+'–'+esc(ev.intAwayScore) : 'vs')+'</span>'+
       '<span class="sht r'+(self==='away'?' self':'')+'">'+badgeHTML(ev.strAwayTeam, ev.strAwayTeamBadge,'')+'<span>'+esc(ev.strAwayTeam)+'</span></span>'+
     '</div>';
- 
+
   let body;
   if(errMsg){
     body = '<div class="stat-empty">'+esc(errMsg)+'</div>';
@@ -1163,10 +814,10 @@ function statsBlock(ev, team, statsArr, errMsg){
       }).join('') +'</div>';
     }
   }
- 
+
   return head + body + '<div class="stat-foot">'+jumpBtns(ev)+'</div>';
 }
- 
+
 async function loadStats(panel){
   const ctx = ROW_EVENTS[panel.id];
   if(!ctx){ panel.innerHTML = '<div class="stat-empty">Stats unavailable for this row.</div>'; return; }
@@ -1179,9 +830,9 @@ async function loadStats(panel){
     panel.innerHTML = statsBlock(ev, team, null, 'Stats couldn’t load right now — give it a refresh in a moment.');
   }
 }
- 
+
 function skeleton(n){ let h=''; for(let i=0;i<n;i++) h+='<div class="skel"></div>'; return h; }
- 
+
 /* ----------------------------- render: home ----------------------------- */
 function renderGroups(){
   $('#groups').innerHTML = GROUPS.map(grp =>
@@ -1197,16 +848,16 @@ function renderGroups(){
     '</article>'
   ).join('');
 }
- 
+
 /* ----------------------------- render: team ----------------------------- */
 let currentTeam = null;
- 
+
 function showHome(){
   $('#team').hidden = true;
   $('#home').hidden = false;
   window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
 }
- 
+
 function teamHeader(team, crestUrl){
   const crest = crestUrl
     ? '<img class="crest" alt="" src="'+esc(crestUrl)+'" onerror="this.src=\''+flag(team.iso,160)+'\'">'
@@ -1217,7 +868,7 @@ function teamHeader(team, crestUrl){
     '<div><h1 class="team-hd__name">'+esc(team.name)+'</h1>'+
     '<div class="team-hd__meta">'+grp+conf+'<span class="pill" id="rankPill" hidden></span></div></div>';
 }
- 
+
 function renderForm(events, team){
   // newest first; skip un-played
   const played = events.filter(e => resultOf(e, team) !== 'U').slice(0,5);
@@ -1227,7 +878,7 @@ function renderForm(events, team){
     return '<span class="chip '+r+'" title="'+esc(e.strHomeTeam)+' '+esc(e.intHomeScore)+'–'+esc(e.intAwayScore)+' '+esc(e.strAwayTeam)+'">'+r+'</span>';
   }).join('') + '<span class="chips__hint">' + played.length + ' of last ' + events.length + '</span>';
 }
- 
+
 async function openTeam(team){
   currentTeam = team;
   rowSeq = 0;
@@ -1238,7 +889,7 @@ async function openTeam(team){
   $('#searchInput').value = '';
   selectTab('wc');
   window.scrollTo({top:0, behavior:'auto'});
- 
+
   // instant shell (flag-based, always works)
   $('#teamHd').innerHTML = teamHeader(team, null);
   $('#formChips').innerHTML = '<span class="chip chip--ph">·</span>'.repeat(5);
@@ -1246,17 +897,17 @@ async function openTeam(team){
   $('#wcWrap').innerHTML = skeleton(3);
   $('#cnt-fr').textContent = '·';
   $('#cnt-wc').textContent = '·';
- 
+
   let resolved = null;
   try{ resolved = await resolveTeam(team.q || [team.name]); }
   catch(e){ resolved = null; }
   if(currentTeam !== team) return;
- 
+
   if(resolved){
     team.idTeam = resolved.idTeam;
     if(resolved.strBadge) $('#teamHd').innerHTML = teamHeader(team, resolved.strBadge);
   }
- 
+
   if(!resolved || !resolved.idTeam){
     $('#formChips').innerHTML = '<span class="chip chip--ph">–</span>'.repeat(5);
     $('#friendlies').innerHTML = '<div class="state">Couldn’t find live match data for <b>'+esc(team.name)+'</b> right now. Try another nation, or refresh in a moment.</div>';
@@ -1265,24 +916,24 @@ async function openTeam(team){
     $('#cnt-wc').textContent = '0';
     return;
   }
- 
+
   // recent results + upcoming fixtures in parallel
   const [resR, resF] = await Promise.allSettled([ lastEvents(resolved.idTeam), nextEvents(resolved.idTeam) ]);
   if(currentTeam !== team) return;
- 
+
   const last = resR.status==='fulfilled' ? (resR.value||[]) : null;
   const next = resF.status==='fulfilled' ? (resF.value||[]) : null;
- 
+
   // form strip — all recent played games (mixed comps), newest first
   if(last) renderForm(last, team);
   else $('#formChips').innerHTML = '<span class="chip chip--ph">–</span>'.repeat(5);
- 
+
   // ---- Build the World Cup pool games from the bracket, matched by OPPONENT (label-proof) ----
   const opps = groupOpponents(team);     // 3 group opponents (empty for non-WC teams)
   const matched = new Set();             // feed events already claimed as WC games
   const wcPlayedRows = [];
   const wcUpcomingRows = [];
- 
+
   if(opps.length){
     for(const opp of opps){
       const evPlayed = findVs(last, team, opp);
@@ -1297,11 +948,11 @@ async function openTeam(team){
   // include any other World Cup games (e.g. knockout rounds) the feed lists
   if(last) last.forEach(e => { if(isWorldCup(e) && !matched.has(e)){ matched.add(e); if(hasScore(e)) wcPlayedRows.push(e); } });
   if(next) next.forEach(e => { if(isWorldCup(e) && !matched.has(e)){ matched.add(e); wcUpcomingRows.push(e); } });
- 
+
   const dkey = e => (e && e.dateEvent) ? e.dateEvent : '9999-99-99';
   wcPlayedRows.sort((a,b)=> dkey(a).localeCompare(dkey(b)));
   wcUpcomingRows.sort((a,b)=> dkey(a).localeCompare(dkey(b)));
- 
+
   // ---- Friendlies tab: recent matches that aren't World Cup games ----
   if(last){
     const friendlies = last.filter(e => !matched.has(e) && !isWorldCup(e));
@@ -1313,7 +964,7 @@ async function openTeam(team){
     $('#cnt-fr').textContent = '–';
     $('#friendlies').innerHTML = '<div class="state">Recent results couldn’t load — give it a refresh in a moment.</div>';
   }
- 
+
   // ---- World Cup tab: games played (with stats) + the pool games coming up ----
   $('#cnt-wc').textContent = String(wcPlayedRows.length + wcUpcomingRows.length);
   if(last===null && next===null && !wcUpcomingRows.length){
@@ -1333,19 +984,19 @@ async function openTeam(team){
     $('#wcWrap').innerHTML = html;
   }
 }
- 
+
 function openByName(name){
   const known = TEAM_INDEX[norm(name)];
   if(known) return openTeam(known);
   // build a lightweight team for any opponent (e.g. a non-qualified friendly opponent)
   return openTeam({name:name, q:[name], iso:null, conf:'', group:''});
 }
- 
+
 /* ----------------------------- search ----------------------------- */
 function wireSearch(){
   const input = $('#searchInput');
   const panel = $('#searchResults');
- 
+
   function close(){ panel.hidden = true; }
   function render(q){
     const ql = norm(q);
@@ -1360,7 +1011,7 @@ function wireSearch(){
     ).join('');
     panel.hidden = false;
   }
- 
+
   input.addEventListener('input', e => render(e.target.value));
   input.addEventListener('focus', e => { if(e.target.value) render(e.target.value); });
   input.addEventListener('keydown', e => {
@@ -1377,7 +1028,7 @@ function wireSearch(){
     if(!e.target.closest('#search')) close();
   });
 }
- 
+
 /* ----------------------------- tabs ----------------------------- */
 function selectTab(name){
   document.querySelectorAll('.tab').forEach(t =>
@@ -1390,19 +1041,19 @@ function wireTabs(){
   document.querySelectorAll('.tab').forEach(t =>
     t.addEventListener('click', () => selectTab(t.dataset.tab)));
 }
- 
+
 /* ----------------------------- events ----------------------------- */
 function wire(){
   $('#brand').addEventListener('click', showHome);
   $('#back').addEventListener('click', showHome);
- 
+
   $('#groups').addEventListener('click', e => {
     const btn = e.target.closest('.teamlink'); if(!btn) return;
     const [g,i] = btn.dataset.team.split('-');
     const grp = GROUPS.find(x => x.g===g);
     if(grp) openTeam(Object.assign({group:g}, grp.teams[+i]));
   });
- 
+
   // expand match rows + jump-to-team buttons (delegated)
   document.addEventListener('click', e => {
     const open = e.target.closest('[data-open]');
@@ -1421,7 +1072,7 @@ function wire(){
     }
   });
 }
- 
+
 /* ----------------------------- init ----------------------------- */
 renderGroups();
 wireSearch();
@@ -1430,4 +1081,3 @@ wire();
 </script>
 </body>
 </html>
- 
