@@ -7,8 +7,9 @@
     2. Settings → Pages → Build from branch → main / root → Save
     3. Open https://<your-username>.github.io/world-cup-26/
   Match data is fetched live in the browser: teams/fixtures/results from TheSportsDB,
-  and per-match stats (shots, on target, corners, saves, possession) from ESPN's free
-  soccer API (matched by teams + date). Flags from FlagCDN. No build step, no API key, no backend.
+  and per-match stats (shots, on target, corners, saves, possession) PLUS pre-tournament
+  friendlies from ESPN's free soccer API (matched by teams + date). Flags from FlagCDN.
+  No build step, no API key, no backend.
 -->
 <html lang="en">
 <head>
@@ -585,9 +586,10 @@ async function eventStats(eventId){
 }
 
 /* ----------------------------- espn (full match stats) ----------------------------- */
-/* ESPN's free, no-key soccer API carries shots/SoT/corners/saves/possession.
+/* ESPN's free, no-key soccer API carries shots/SoT/corners/saves/possession + friendlies.
    We match a TheSportsDB game to ESPN's by the two teams + date, then read its boxscore. */
-const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
+const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
+const ESPN = ESPN_BASE + '/fifa.world';
 
 function shiftDate(iso, delta){
   const d = new Date(iso+'T00:00:00Z');
@@ -676,7 +678,54 @@ async function espnStatsRows(ev){
   return rows.length ? rows : null;
 }
 
-/* ----------------------------- helpers ----------------------------- */
+/* --- friendlies: pull each team's pre-WC warm-ups from ESPN's International Friendly feed --- */
+const FRIENDLY_WINDOW = '20260520-20260610';  // the warm-up window before June 11 kickoff
+let espnFriendlyCache = null;
+async function espnFriendlyEvents(){
+  if(espnFriendlyCache) return espnFriendlyCache;
+  try{
+    const j = await getJSON(ESPN_BASE+'/fifa.friendly/scoreboard?dates='+FRIENDLY_WINDOW+'&limit=500');
+    espnFriendlyCache = (j && j.events) || [];
+  }catch(e){ espnFriendlyCache = []; }
+  return espnFriendlyCache;
+}
+/* convert an ESPN scoreboard event into the TheSportsDB-ish shape our rows render */
+function espnToRow(e){
+  const comp = e.competitions && e.competitions[0];
+  const cs = (comp && comp.competitors) || [];
+  if(cs.length < 2) return null;
+  const home = cs.find(c => c.homeAway==='home') || cs[0];
+  const away = cs.find(c => c.homeAway==='away') || cs[1];
+  const canon = n => { const t = TEAM_INDEX[norm(n||'')]; return t ? t.name : (n||''); };
+  const nm = c => canon(c.team && (c.team.displayName || c.team.name));
+  const sc = c => (c.score!=null && c.score!=='') ? c.score : null;
+  return {
+    idEvent: e.id,
+    strHomeTeam: nm(home), strAwayTeam: nm(away),
+    strHomeTeamBadge: home.team && home.team.logo, strAwayTeamBadge: away.team && away.team.logo,
+    intHomeScore: sc(home), intAwayScore: sc(away),
+    dateEvent: (e.date||'').slice(0,10), strTime: (e.date||'').slice(11,16),
+    strVenue: (comp && comp.venue && comp.venue.fullName) || '',
+    strLeague: 'International Friendly'
+  };
+}
+async function espnFriendlies(team){
+  const events = await espnFriendlyEvents();
+  const mine = [];
+  for(const e of events){
+    const comp = e.competitions && e.competitions[0];
+    const cs = (comp && comp.competitors) || [];
+    if(cs.length < 2) continue;
+    const n1 = cs[0].team && (cs[0].team.displayName || cs[0].team.name);
+    const n2 = cs[1].team && (cs[1].team.displayName || cs[1].team.name);
+    if(sameTeam(n1, team.name) || sameTeam(n2, team.name)){
+      const row = espnToRow(e);
+      if(row) mine.push(row);
+    }
+  }
+  mine.sort((a,b) => (b.dateEvent||'').localeCompare(a.dateEvent||''));
+  return mine.slice(0, 2);  // the two closest to the World Cup
+}
 const $ = s => document.querySelector(s);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const flag = (iso, w) => 'https://flagcdn.com/w'+(w||80)+'/'+iso+'.png';
@@ -1055,19 +1104,7 @@ async function openTeam(team){
   wcPlayedRows.sort((a,b)=> dkey(a).localeCompare(dkey(b)));
   wcUpcomingRows.sort((a,b)=> dkey(a).localeCompare(dkey(b)));
 
-  // ---- Friendlies tab: recent matches that aren't World Cup games ----
-  if(last){
-    const friendlies = last.filter(e => !matched.has(e) && !isWorldCup(e));
-    $('#cnt-fr').textContent = String(friendlies.length);
-    $('#friendlies').innerHTML = friendlies.length
-      ? friendlies.map(e => matchHTML(e, team, false)).join('')
-      : '<div class="state">No warm-up friendlies in the recent feed for <b>'+esc(team.name)+'</b>.</div>';
-  }else{
-    $('#cnt-fr').textContent = '–';
-    $('#friendlies').innerHTML = '<div class="state">Recent results couldn’t load — give it a refresh in a moment.</div>';
-  }
-
-  // ---- World Cup tab: games played (with stats) + the pool games coming up ----
+  // ---- World Cup tab (default): games played (with stats) + the pool games coming up ----
   $('#cnt-wc').textContent = String(wcPlayedRows.length + wcUpcomingRows.length);
   if(last===null && next===null && !wcUpcomingRows.length){
     $('#wcWrap').innerHTML = '<div class="state">World Cup feed couldn’t load — give it a refresh in a moment.</div>';
@@ -1084,6 +1121,21 @@ async function openTeam(team){
       html += '<div class="matches">'+wcUpcomingRows.map(e => matchHTML(e, team, true)).join('')+'</div>';
     }
     $('#wcWrap').innerHTML = html;
+  }
+
+  // ---- Friendlies tab: ESPN's International Friendly feed (reliable), TheSportsDB as fallback ----
+  const tsdbFr = last ? last.filter(e => !matched.has(e) && !isWorldCup(e)) : [];
+  let espnFr = [];
+  try{ espnFr = await espnFriendlies(team); }catch(e){ espnFr = []; }
+  if(currentTeam !== team) return;
+  const fr = espnFr.length ? espnFr : tsdbFr;
+  $('#cnt-fr').textContent = String(fr.length);
+  if(fr.length){
+    $('#friendlies').innerHTML = fr.map(e => matchHTML(e, team, false)).join('');
+  }else if(last === null){
+    $('#friendlies').innerHTML = '<div class="state">Friendlies couldn’t load — give it a refresh in a moment.</div>';
+  }else{
+    $('#friendlies').innerHTML = '<div class="state">No recent warm-up friendlies found for <b>'+esc(team.name)+'</b>.</div>';
   }
 }
 
