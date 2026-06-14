@@ -282,6 +282,48 @@
   .mm-btn:hover{border-color:var(--gold-deep); background:var(--surface)}
   .mm-btn img{width:18px; height:13px; object-fit:cover; border-radius:2px}
 
+  /* ---------- home tabs (Groups / Fixtures) ---------- */
+  .htabs{display:flex; gap:4px; margin:8px 0 0; border-bottom:1px solid var(--line)}
+  .htab{appearance:none; background:none; border:0; cursor:pointer; position:relative;
+    font-family:'Archivo',sans-serif; font-weight:800; font-size:15px; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--faint); padding:13px 16px 16px; display:inline-flex; align-items:center; gap:9px; transition:color .15s}
+  .htab:hover{color:var(--muted)}
+  .htab[aria-selected="true"]{color:var(--chalk)}
+  .htab[aria-selected="true"]::after{content:""; position:absolute; left:12px; right:12px; bottom:-1px; height:2px;
+    background:var(--gold); border-radius:2px 2px 0 0}
+  .htab__sub{font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.1em; color:var(--faint);
+    border:1px solid var(--line-strong); border-radius:5px; padding:2px 6px}
+  .htab[aria-selected="true"] .htab__sub{color:var(--gold); border-color:var(--gold-deep)}
+  #hpanel-groups, #hpanel-fixtures{animation:fade .22s ease}
+  #hpanel-groups[hidden], #hpanel-fixtures[hidden]{display:none}
+
+  /* fixtures / schedule list */
+  .fxday{display:flex; align-items:center; gap:13px; margin:26px 0 13px}
+  .fxday:first-child{margin-top:6px}
+  .fxday h4{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--gold); margin:0; white-space:nowrap}
+  .fxday::after{content:""; flex:1; height:1px; background:var(--line)}
+  .fxrow{display:grid; grid-template-columns:62px 1fr 116px; align-items:center; gap:12px;
+    padding:11px 14px; border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface); margin-bottom:8px}
+  .fxtime{font-family:'Space Mono',monospace; font-weight:700; font-size:12.5px; color:var(--chalk); white-space:nowrap}
+  .fxmatch{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; min-width:0}
+  .fxteam{display:inline-flex; align-items:center; gap:8px; background:none; border:0; cursor:pointer; font:inherit;
+    color:var(--chalk); font-weight:600; font-size:14px; padding:5px 7px; border-radius:7px; min-width:0; transition:background .12s,color .12s}
+  span.fxteam{cursor:default}
+  button.fxteam:hover{background:var(--surface2); color:var(--gold)}
+  .fxteam span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .fxteam.home{flex-direction:row; justify-self:end; text-align:right}
+  .fxteam.away{flex-direction:row; justify-self:start}
+  .fxflag{width:24px; height:16px; object-fit:cover; border-radius:3px; flex:0 0 auto; box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+  .fxv{font-family:'Space Mono',monospace; font-size:11px; color:var(--faint); flex:0 0 auto}
+  .fxvenue{font-size:12px; color:var(--faint); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  @media(max-width:640px){
+    .fxrow{grid-template-columns:54px 1fr; row-gap:2px}
+    .fxvenue{grid-column:1 / -1; text-align:left; padding-left:2px; font-size:11px}
+    .fxteam{font-size:13px; padding:4px 5px}
+    .fxteam span{max-width:30vw}
+  }
+
   /* ---------- tabs ---------- */
   .tabs{display:flex; gap:4px; margin:28px 0 0; border-bottom:1px solid var(--line)}
   .tab{
@@ -409,12 +451,28 @@
       <p>Pick any of the <b>48 nations</b> to pull up recent results, upcoming group fixtures, and the warm-up <b>friendlies</b> that led into the tournament — scores, opponents and form, all live.</p>
     </div>
 
-    <div class="section-head">
-      <h2>The Groups</h2>
-      <span class="rule"></span>
-      <span class="count">A – L</span>
+    <div class="htabs" role="tablist" aria-label="Home views">
+      <button class="htab" id="htab-groups" role="tab" aria-selected="true" aria-controls="hpanel-groups" data-htab="groups">The Groups</button>
+      <button class="htab" id="htab-fixtures" role="tab" aria-selected="false" aria-controls="hpanel-fixtures" data-htab="fixtures">Fixtures <span class="htab__sub">ET</span></button>
     </div>
-    <div class="groups" id="groups"></div>
+
+    <div id="hpanel-groups" role="tabpanel" aria-labelledby="htab-groups">
+      <div class="section-head">
+        <h2>The Groups</h2>
+        <span class="rule"></span>
+        <span class="count">A – L</span>
+      </div>
+      <div class="groups" id="groups"></div>
+    </div>
+
+    <div id="hpanel-fixtures" role="tabpanel" aria-labelledby="htab-fixtures" hidden>
+      <div class="section-head">
+        <h2>Upcoming</h2>
+        <span class="rule"></span>
+        <span class="count">Eastern Time</span>
+      </div>
+      <div id="fixturesWrap"></div>
+    </div>
   </section>
 
   <!-- TEAM -->
@@ -725,6 +783,73 @@ async function espnFriendlies(team){
   }
   mine.sort((a,b) => (b.dateEvent||'').localeCompare(a.dateEvent||''));
   return mine.slice(0, 2);  // the two closest to the World Cup
+}
+
+/* --- tournament fixtures (upcoming WC games, shown in Eastern time) --- */
+const ET = 'America/New_York';
+function ymdOffset(days){
+  const d = new Date(Date.now() + days*86400000);
+  return d.toLocaleDateString('en-CA', {timeZone:ET}).replace(/-/g,'');  // YYYYMMDD in ET
+}
+async function espnFixtures(){
+  const j = await getJSON(ESPN+'/scoreboard?dates='+ymdOffset(0)+'-'+ymdOffset(14)+'&limit=500');
+  return (j && j.events) || [];
+}
+function fixtureRowHTML(e){
+  const comp = e.competitions && e.competitions[0];
+  const cs = (comp && comp.competitors) || [];
+  const home = cs.find(c => c.homeAway==='home') || cs[0] || {};
+  const away = cs.find(c => c.homeAway==='away') || cs[1] || {};
+  const info = c => { const n = c.team && (c.team.displayName||c.team.name); const t = TEAM_INDEX[norm(n||'')];
+    return {name: t ? t.name : (n||'TBD'), iso: t?t.iso:null, logo: (c.team&&c.team.logo)||null, known: !!t}; };
+  const h = info(home), a = info(away);
+  const time = e.date ? new Date(e.date).toLocaleTimeString('en-US', {timeZone:ET, hour:'numeric', minute:'2-digit'}) : '';
+  const v = comp && comp.venue;
+  const place = v ? ((v.address && v.address.city) || v.fullName || '') : '';
+  const badge = t => t.iso ? '<img class="fxflag" alt="" src="'+flag(t.iso,40)+'">'
+                           : (t.logo ? '<img class="fxflag" alt="" src="'+esc(t.logo)+'">' : '');
+  const cell = (t, side) => {
+    const inner = side==='home' ? '<span>'+esc(t.name)+'</span>'+badge(t) : badge(t)+'<span>'+esc(t.name)+'</span>';
+    return t.known ? '<button class="fxteam '+side+'" data-open="'+esc(t.name)+'">'+inner+'</button>'
+                   : '<span class="fxteam '+side+'">'+inner+'</span>';
+  };
+  return '<div class="fxrow">'+
+      '<span class="fxtime">'+esc(time)+'</span>'+
+      '<span class="fxmatch">'+cell(h,'home')+'<span class="fxv">v</span>'+cell(a,'away')+'</span>'+
+      '<span class="fxvenue">'+esc(place)+'</span>'+
+    '</div>';
+}
+let fixturesLoaded = false;
+async function renderFixtures(){
+  if(fixturesLoaded) return;
+  fixturesLoaded = true;
+  const wrap = $('#fixturesWrap');
+  wrap.innerHTML = skeleton(6);
+  let events;
+  try{ events = await espnFixtures(); }
+  catch(e){ fixturesLoaded = false; wrap.innerHTML = '<div class="state">Couldn’t load the schedule right now — try again in a moment.</div>'; return; }
+
+  // upcoming (not yet kicked off) games where at least one side is a known nation
+  const upcoming = events.filter(e => {
+    const st = e.status && e.status.type && e.status.type.state;
+    if(st !== 'pre') return false;
+    const cs = (e.competitions && e.competitions[0] && e.competitions[0].competitors) || [];
+    return cs.some(c => { const n = c.team && (c.team.displayName||c.team.name); return !!TEAM_INDEX[norm(n||'')]; });
+  });
+  if(!upcoming.length){ wrap.innerHTML = '<div class="state">No upcoming games scheduled in the next couple of weeks.</div>'; return; }
+
+  const groups = {};
+  for(const e of upcoming){
+    const key = new Date(e.date).toLocaleDateString('en-CA', {timeZone:ET});  // ET day, sortable
+    (groups[key] = groups[key] || []).push(e);
+  }
+  let html = '';
+  for(const k of Object.keys(groups).sort()){
+    const games = groups[k].sort((a,b) => new Date(a.date) - new Date(b.date));
+    const label = new Date(games[0].date).toLocaleDateString('en-US', {timeZone:ET, weekday:'long', month:'long', day:'numeric'});
+    html += '<div class="fxday"><h4>'+esc(label)+'</h4></div>' + games.map(fixtureRowHTML).join('');
+  }
+  wrap.innerHTML = html;
 }
 const $ = s => document.querySelector(s);
 const esc = s => (s==null?'':String(s)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1196,6 +1321,19 @@ function wireTabs(){
     t.addEventListener('click', () => selectTab(t.dataset.tab)));
 }
 
+/* home tabs: Groups / Fixtures */
+function selectHomeTab(name){
+  document.querySelectorAll('.htab').forEach(t =>
+    t.setAttribute('aria-selected', t.dataset.htab===name ? 'true' : 'false'));
+  $('#hpanel-groups').hidden = name!=='groups';
+  $('#hpanel-fixtures').hidden = name!=='fixtures';
+  if(name==='fixtures') renderFixtures();   // lazy-load on first open
+}
+function wireHomeTabs(){
+  document.querySelectorAll('.htab').forEach(t =>
+    t.addEventListener('click', () => selectHomeTab(t.dataset.htab)));
+}
+
 /* ----------------------------- events ----------------------------- */
 function wire(){
   $('#brand').addEventListener('click', showHome);
@@ -1231,6 +1369,7 @@ function wire(){
 renderGroups();
 wireSearch();
 wireTabs();
+wireHomeTabs();
 wire();
 </script>
 </body>
