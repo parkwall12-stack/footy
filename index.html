@@ -6,8 +6,9 @@
     1. Create a repo (e.g. "world-cup-26") and add this file as index.html
     2. Settings → Pages → Build from branch → main / root → Save
     3. Open https://<your-username>.github.io/world-cup-26/
-  Match data is fetched live in the browser from TheSportsDB (free, CORS-enabled).
-  Flags from FlagCDN. No build step, no API key, no backend.
+  Match data is fetched live in the browser: teams/fixtures/results from TheSportsDB,
+  and per-match stats (shots, on target, corners, saves, possession) from ESPN's free
+  soccer API (matched by teams + date). Flags from FlagCDN. No build step, no API key, no backend.
 -->
 <html lang="en">
 <head>
@@ -337,6 +338,8 @@
   .bar i.on{background:var(--gold)}
   .bar i.off{background:var(--line-strong)}
   .stat-foot{display:flex; gap:9px; flex-wrap:wrap; margin-top:14px; padding-top:13px; border-top:1px solid var(--line)}
+  .stat-src{font-family:'Space Mono',monospace; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--faint); text-align:right; margin-top:11px; opacity:.7}
   .stat-empty{padding:6px 2px 4px; color:var(--muted); font-size:13px; line-height:1.5}
   .stat-empty b{color:var(--chalk)}
   .stat-empty .sub{display:block; margin-top:4px; color:var(--faint); font-size:12px}
@@ -448,7 +451,7 @@
 <footer>
   <div class="wrap">
     <span>TOUCHLINE — a World Cup 2026 explorer.</span>
-    <span>Match data: <a href="https://www.thesportsdb.com" target="_blank" rel="noopener">TheSportsDB</a></span>
+    <span>Match data: <a href="https://www.thesportsdb.com" target="_blank" rel="noopener">TheSportsDB</a> · stats <a href="https://www.espn.com/soccer/" target="_blank" rel="noopener">ESPN</a></span>
     <span>Flags: <a href="https://flagcdn.com" target="_blank" rel="noopener">FlagCDN</a></span>
     <span>Not affiliated with FIFA. Tap a World Cup game for shots, possession &amp; more.</span>
   </div>
@@ -579,6 +582,98 @@ async function nextEvents(id){ const j = await getJSON(API+'/eventsnext.php?id='
 async function eventStats(eventId){
   const j = await getJSON(API+'/lookupeventstats.php?id='+encodeURIComponent(eventId));
   return (j && (j.eventstats || j.statistics || j.results)) || [];
+}
+
+/* ----------------------------- espn (full match stats) ----------------------------- */
+/* ESPN's free, no-key soccer API carries shots/SoT/corners/saves/possession.
+   We match a TheSportsDB game to ESPN's by the two teams + date, then read its boxscore. */
+const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
+
+function shiftDate(iso, delta){
+  const d = new Date(iso+'T00:00:00Z');
+  if(isNaN(d.getTime())) return null;
+  d.setUTCDate(d.getUTCDate()+delta);
+  return d.toISOString().slice(0,10).replace(/-/g,'');
+}
+/* robust nation-name equality across TheSportsDB / ESPN naming (Czechia, Korea, etc.) */
+function sameTeam(a, b){
+  const na = norm(a), nb = norm(b);
+  if(!na || !nb) return false;
+  if(na === nb) return true;
+  const ta = TEAM_INDEX[na], tb = TEAM_INDEX[nb];
+  if(ta && tb) return norm(ta.name) === norm(tb.name);
+  if(ta) return matchesFoe(b, ta);
+  if(tb) return matchesFoe(a, tb);
+  return false;
+}
+/* find ESPN's event id for a TSDB match: scan a ±1 day window (ESPN groups by US date) */
+async function espnEventId(ev){
+  if(!ev || !ev.dateEvent) return null;
+  const lo = shiftDate(ev.dateEvent, -1), hi = shiftDate(ev.dateEvent, 1);
+  if(!lo || !hi) return null;
+  const j = await getJSON(ESPN+'/scoreboard?dates='+lo+'-'+hi+'&limit=300');
+  const events = (j && j.events) || [];
+  const want = ev.dateEvent.replace(/-/g,'');
+  let best = null, bestGap = 1e9;
+  for(const e of events){
+    const comp = e.competitions && e.competitions[0];
+    const cs = (comp && comp.competitors) || [];
+    if(cs.length < 2) continue;
+    const n1 = cs[0].team && (cs[0].team.displayName || cs[0].team.name);
+    const n2 = cs[1].team && (cs[1].team.displayName || cs[1].team.name);
+    const pair = (sameTeam(n1, ev.strHomeTeam) && sameTeam(n2, ev.strAwayTeam)) ||
+                 (sameTeam(n1, ev.strAwayTeam) && sameTeam(n2, ev.strHomeTeam));
+    if(!pair) continue;
+    const d = (e.date || '').slice(0,10).replace(/-/g,'');
+    const gap = d ? Math.abs(parseInt(d) - parseInt(want)) : 0;
+    if(gap < bestGap){ bestGap = gap; best = e.id; }
+  }
+  return best;
+}
+/* the five stats we want, mapped to ESPN's boxscore stat name/label variants */
+const ESPN_STATS = [
+  {label:'Total shots',     names:['totalshots'],                         labels:['shots','total shots']},
+  {label:'Shots on target', names:['shotsontarget','shotsongoal'],        labels:['shots on target','shots on goal']},
+  {label:'Corners',         names:['woncorners','corners','cornerkicks'], labels:['corners','corner kicks','won corners']},
+  {label:'Saves',           names:['saves','goalkeepersaves'],            labels:['saves','goalkeeper saves']},
+  {label:'Possession',      names:['possessionpct','possession'],         labels:['possession','possession %']},
+];
+function espnStatMap(teamBox){
+  const m = {};
+  ((teamBox && teamBox.statistics) || []).forEach(s => {
+    const val = (s.displayValue!=null ? s.displayValue : s.value);
+    const nm = norm(s.name || '');
+    const lb = String(s.label || s.displayName || '').toLowerCase().trim();
+    if(nm) m['n:'+nm] = val;
+    if(lb) m['l:'+lb] = val;
+  });
+  return m;
+}
+function espnPick(map, spec){
+  for(const n of spec.names){ if(map['n:'+n]!=null) return map['n:'+n]; }
+  for(const l of spec.labels){ if(map['l:'+l]!=null) return map['l:'+l]; }
+  return null;
+}
+/* fetch ESPN boxscore for a TSDB game → rows aligned to that game's home/away */
+async function espnStatsRows(ev){
+  const id = await espnEventId(ev);
+  if(!id) return null;
+  const j = await getJSON(ESPN+'/summary?event='+encodeURIComponent(id));
+  const teams = (j && j.boxscore && j.boxscore.teams) || [];
+  if(teams.length < 2) return null;
+  const n0 = teams[0].team && (teams[0].team.displayName || teams[0].team.name);
+  const homeBox = sameTeam(n0, ev.strHomeTeam) ? teams[0] : teams[1];
+  const awayBox = (homeBox === teams[0]) ? teams[1] : teams[0];
+  const hm = espnStatMap(homeBox), am = espnStatMap(awayBox);
+  const fmtPoss = v => { const n = statNum(v); return n==null ? v : Math.round(n)+'%'; };
+  const rows = [];
+  for(const spec of ESPN_STATS){
+    let hv = espnPick(hm, spec), av = espnPick(am, spec);
+    if(hv==null && av==null) continue;
+    if(spec.label === 'Possession'){ hv = hv==null?null:fmtPoss(hv); av = av==null?null:fmtPoss(av); }
+    rows.push({label:spec.label, hv, av});
+  }
+  return rows.length ? rows : null;
 }
 
 /* ----------------------------- helpers ----------------------------- */
@@ -778,8 +873,8 @@ function wcPlayedHTML(ev, team){
   return '<div class="match-wrap">'+rowHead(ev, team, false, id)+more+'</div>';
 }
 
-/* build the stats panel body (header + bars, or a clean empty/error state) */
-function statsBlock(ev, team, statsArr, errMsg){
+/* build the stats panel body from already-normalized rows ([{label,hv,av}]) */
+function statsBlock(ev, team, rows, errMsg, source){
   const self = sideOf(ev, team) || 'home';
   const head =
     '<div class="stat-head">'+
@@ -791,44 +886,51 @@ function statsBlock(ev, team, statsArr, errMsg){
   let body;
   if(errMsg){
     body = '<div class="stat-empty">'+esc(errMsg)+'</div>';
+  }else if(!rows || !rows.length){
+    body = '<div class="stat-empty">No detailed stats are logged for this match yet.'+
+      '<span class="sub">Stats show up once the match has been played and the data feed has them.</span></div>';
   }else{
-    const rows = pickStats(statsArr);
-    if(!rows.length){
-      body = '<div class="stat-empty">No detailed stats are logged for this match yet.'+
-        '<span class="sub">TheSportsDB doesn’t carry a box score for every fixture — coverage is strongest for major tournament games.</span></div>';
-    }else{
-      body = '<div class="statline">'+ rows.map(r=>{
-        const hn = statNum(r.hv), an = statNum(r.av);
-        const tot = (hn||0)+(an||0);
-        const hp = tot>0 ? Math.round((hn||0)/tot*100) : 50;
-        const hOn = self==='home' ? 'on' : 'off';
-        const aOn = self==='away' ? 'on' : 'off';
-        return '<div class="statrow">'+
-            '<span class="statrow__v l'+(self==='home'?' self':'')+'">'+(r.hv==null?'–':esc(r.hv))+'</span>'+
-            '<span class="statrow__mid">'+
-              '<div class="statrow__lbl">'+esc(r.label)+'</div>'+
-              '<div class="bar"><i class="'+hOn+'" style="width:'+hp+'%"></i><i class="'+aOn+'" style="width:'+(100-hp)+'%"></i></div>'+
-            '</span>'+
-            '<span class="statrow__v r'+(self==='away'?' self':'')+'">'+(r.av==null?'–':esc(r.av))+'</span>'+
-          '</div>';
-      }).join('') +'</div>';
-    }
+    body = '<div class="statline">'+ rows.map(r=>{
+      const hn = statNum(r.hv), an = statNum(r.av);
+      const tot = (hn||0)+(an||0);
+      const hp = tot>0 ? Math.round((hn||0)/tot*100) : 50;
+      const hOn = self==='home' ? 'on' : 'off';
+      const aOn = self==='away' ? 'on' : 'off';
+      return '<div class="statrow">'+
+          '<span class="statrow__v l'+(self==='home'?' self':'')+'">'+(r.hv==null?'–':esc(r.hv))+'</span>'+
+          '<span class="statrow__mid">'+
+            '<div class="statrow__lbl">'+esc(r.label)+'</div>'+
+            '<div class="bar"><i class="'+hOn+'" style="width:'+hp+'%"></i><i class="'+aOn+'" style="width:'+(100-hp)+'%"></i></div>'+
+          '</span>'+
+          '<span class="statrow__v r'+(self==='away'?' self':'')+'">'+(r.av==null?'–':esc(r.av))+'</span>'+
+        '</div>';
+    }).join('') +'</div>';
   }
 
-  return head + body + '<div class="stat-foot">'+jumpBtns(ev)+'</div>';
+  const src = source ? '<div class="stat-src">via '+esc(source)+'</div>' : '';
+  return head + body + src + '<div class="stat-foot">'+jumpBtns(ev)+'</div>';
 }
 
 async function loadStats(panel){
   const ctx = ROW_EVENTS[panel.id];
   if(!ctx){ panel.innerHTML = '<div class="stat-empty">Stats unavailable for this row.</div>'; return; }
   const {ev, team} = ctx;
-  if(!ev.idEvent){ panel.innerHTML = statsBlock(ev, team, null, 'No match ID is available to pull stats for this game.'); return; }
+
+  // 1) ESPN — full set (shots, shots on target, corners, saves, possession)
   try{
-    const arr = await eventStats(ev.idEvent);
-    panel.innerHTML = statsBlock(ev, team, arr, null);
-  }catch(e){
-    panel.innerHTML = statsBlock(ev, team, null, 'Stats couldn’t load right now — give it a refresh in a moment.');
+    const rows = await espnStatsRows(ev);
+    if(rows && rows.length){ panel.innerHTML = statsBlock(ev, team, rows, null, 'ESPN'); return; }
+  }catch(e){ /* fall through to TheSportsDB */ }
+
+  // 2) Fallback — TheSportsDB (free tier returns fewer stats, but better than nothing)
+  if(ev.idEvent){
+    try{
+      const rows = pickStats(await eventStats(ev.idEvent));
+      if(rows.length){ panel.innerHTML = statsBlock(ev, team, rows, null, 'TheSportsDB'); return; }
+    }catch(e){ /* fall through to empty state */ }
   }
+
+  panel.innerHTML = statsBlock(ev, team, [], null, null);
 }
 
 function skeleton(n){ let h=''; for(let i=0;i<n;i++) h+='<div class="skel"></div>'; return h; }
